@@ -1,0 +1,188 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card">
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-verified"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">First Memo Approval</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="memoApprovalForm" class="nc-form">
+
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Ticket</div>
+            <div class="nc-section__desc">Choose branch, group code, and ticket to load approval details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branchlist"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branch_name"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['cao'].touched && f['cao'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Branch is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select
+              [options]="approvedGroupCodes"
+              optionLabel="groupcode"
+              optionValue="groupcode"
+              formControlName="group"
+              placeholder="Select group code"
+              [filter]="true"
+              filterBy="groupcode"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['group'].touched && f['group'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['ticket'].touched && f['ticket'].invalid">
+            <label class="nc-label">Ticket No<span class="nc-req">*</span></label>
+            <p-select
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket no"
+              [filter]="true"
+              filterBy="ticketno"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['ticket'].touched && f['ticket'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Ticket No is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Approved Details</div>
+            <div class="nc-section__desc">Read-only details loaded from the first memo approval</div>
+          </div>
+        </div>
+
+        <div class="nc-readonly-panel">
+          <div class="nc-readonly-panel__header">
+            <i class="pi pi-history"></i>
+            Approved Details
+            <p-tag styleClass="nc-tag-ro" value="Read-only"></p-tag>
+          </div>
+          <div class="nc-readonly-panel__fields nc-grid-3">
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Approved Date</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="approvedDate" readonly>
+            </div>
+            <div class="nc-field" style="grid-column: span 2;">
+              <label class="nc-label nc-label--sm">Approved File Name</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="approvedFileName" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">Remarks</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label">Remarks<span class="nc-req">*</span></label>
+            <span class="nc-char-count"
+                  [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                  [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+              {{ f['reason'].value?.length || 0 }} / 200
+            </span>
+          </div>
+          <textarea
+            pTextarea
+            class="nc-textarea"
+            formControlName="reason"
+            rows="4"
+            placeholder="Enter reason (min 10 characters)..."
+            (keydown)="preventExceedLength($event, 200)">
+          </textarea>
+          @if (f['reason'].touched && f['reason'].errors?.['required']) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Reason is required</div>
+          }
+          @if (f['reason'].touched && f['reason'].errors?.['minlength']) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Minimum 10 characters required</div>
+          }
+          @if (f['reason'].touched && f['reason'].errors?.['maxlength']) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Maximum 200 characters allowed</div>
+          }
+        </div>
+      </div>
+
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            (click)="clear()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="ReApproval"
+            icon="pi pi-check"
+            (click)="confirmSave()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

@@ -1,0 +1,438 @@
+<div class="rou-page">
+
+  <!-- ── Filter Card ─────────────────────────────────────────── -->
+  <div class="rou-filter-card">
+    <div class="rou-card-header">
+      <div class="rou-header-left">
+        <span class="rou-header-bar"></span>
+        <div>
+          <span class="rou-header-title">Reports of Updates</span>
+          <div class="rou-header-subtitle">Filter audit activity and export the records you need</div>
+        </div>
+      </div>
+      <span class="rou-header-badge">Audit Explorer</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="filterReports()" class="rou-filter-body">
+
+      <div class="rou-filter-row">
+
+        <!-- From Date -->
+        <div class="rou-field">
+          <label class="rou-label">From Date <span class="rou-required">*</span></label>
+          <input type="date" formControlName="fromDate" class="rou-input nc-date-input"
+            [class.rou-input-error]="form.get('fromDate')?.touched && form.get('fromDate')?.invalid">
+          @if (form.get('fromDate')?.touched && form.get('fromDate')?.invalid) {
+            <span class="rou-error-msg">Required</span>
+          }
+        </div>
+
+        <!-- To Date -->
+        <div class="rou-field">
+          <label class="rou-label">To Date <span class="rou-required">*</span></label>
+          <input type="date" formControlName="toDate" class="rou-input nc-date-input"
+            [class.rou-input-error]="form.get('toDate')?.touched && form.get('toDate')?.invalid">
+          @if (form.get('toDate')?.touched && form.get('toDate')?.invalid) {
+            <span class="rou-error-msg">Required</span>
+          }
+        </div>
+
+        <!-- Change Type -->
+        <div class="rou-field">
+          <label class="rou-label">Change Type <span class="rou-required">*</span></label>
+          <select formControlName="changeType" class="rou-input"
+            [class.rou-input-error]="form.get('changeType')?.touched && form.get('changeType')?.invalid">
+            <option value="" disabled>Select type</option>
+            <option *ngFor="let type of changeTypes" [value]="type">{{ type }}</option>
+          </select>
+          @if (form.get('changeType')?.touched && form.get('changeType')?.invalid) {
+            <span class="rou-error-msg">Required</span>
+          }
+        </div>
+
+        <!-- Export Format -->
+        <div class="rou-field">
+          <label class="rou-label">Download Format</label>
+          <div class="rou-radio-group">
+            <label class="rou-radio-label">
+              <input type="radio" formControlName="exportFormat" value="Excel" class="rou-radio">
+              <span class="rou-radio-icon">📊</span> Excel
+            </label>
+            <label class="rou-radio-label">
+              <input type="radio" formControlName="exportFormat" value="PDF" class="rou-radio">
+              <span class="rou-radio-icon">📄</span> PDF
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="rou-filter-actions">
+        <button type="submit" class="rou-btn rou-btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Get Records
+        </button>
+        <button type="button" class="rou-btn rou-btn-success" (click)="exportData()"
+          [disabled]="!filteredReports.length">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ── Results Table ──────────────────────────────────────── -->
+  <div class="rou-table-card">
+
+    <!-- Table header bar -->
+    <div class="rou-table-header">
+      <div class="rou-header-left">
+        <span class="rou-header-bar"></span>
+        <div>
+          <span class="rou-header-title">Audit Records</span>
+          <div class="rou-header-subtitle">Live results from your selected filters</div>
+        </div>
+      </div>
+      @if (filteredReports.length > 0) {
+        <span class="rou-badge">{{ filteredReports.length }} records</span>
+      }
+    </div>
+
+    <div class="rou-table-wrap">
+      <table class="rou-table">
+
+        <thead>
+          <tr>
+            <th style="width:44px;">#</th>
+            <th style="min-width:130px;">Login ID</th>
+            <th style="min-width:160px;">Login Date</th>
+            <th style="min-width:140px;">Change Type</th>
+            <th style="min-width:280px;">Old Data</th>
+            <th style="min-width:280px;">New Data</th>
+            <th style="min-width:200px;">Reason</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (filteredReports.length === 0) {
+            <tr>
+              <td colspan="7" class="rou-empty">
+                <div class="rou-empty-icon">🔍</div>
+                <div>Select filters and click <strong>Get Records</strong> to load data.</div>
+              </td>
+            </tr>
+          }
+
+          @for (row of filteredReports; track $index) {
+            <tr class="rou-row">
+              <td class="rou-td-center rou-index">{{ $index + 1 }}</td>
+
+              <td class="rou-td">
+                <span class="rou-login-chip">{{ row.loginId }}</span>
+              </td>
+
+              <td class="rou-td rou-date">
+                {{ row.loginDate | date:'dd MMM yyyy' }}<br>
+                <span class="rou-time">{{ row.loginDate | date:'HH:mm:ss' }}</span>
+              </td>
+
+              <td class="rou-td-center">
+                <span class="rou-type-chip" [class]="'rou-type-' + (row.changeType | lowercase | slice:0:6)">
+                  {{ row.changeType }}
+                </span>
+              </td>
+
+              <td class="rou-td">
+                <pre class="rou-json">{{ row.oldData | json }}</pre>
+              </td>
+
+              <td class="rou-td">
+                <pre class="rou-json">{{ row.newData | json }}</pre>
+              </td>
+
+              <td class="rou-td rou-reason">{{ row.reason }}</td>
+            </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ Scoped Styles ══════════════════════════════════════════════ -->
+<style>
+/* Page */
+.rou-page {
+  padding: 24px;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Card shell */
+.rou-filter-card,
+.rou-table-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 16px 44px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+/* Card header */
+.rou-card-header,
+.rou-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px;
+  background: linear-gradient(90deg, #f8fbff 0%, #eef4ff 100%);
+  border-bottom: 1px solid #e2e8f0;
+}
+.rou-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rou-header-bar {
+  display: inline-block;
+  width: 4px;
+  height: 22px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4f46e5, #818cf8);
+  flex-shrink: 0;
+}
+.rou-header-title {
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: #0f172a;
+  display: block;
+}
+.rou-header-subtitle {
+  font-size: 0.74rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+.rou-header-badge,
+.rou-badge {
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid #c7d2fe;
+  white-space: nowrap;
+}
+
+/* Filter body */
+.rou-filter-body { padding: 22px 24px 20px; }
+
+.rou-filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.rou-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.rou-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.rou-required { color: #ef4444; }
+
+.rou-input {
+  height: 42px;
+  padding: 0 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+}
+.rou-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.14);
+  transform: translateY(-1px);
+}
+.rou-input-error { border-color: #ef4444 !important; }
+.rou-error-msg { font-size: 0.72rem; color: #ef4444; }
+
+/* Radio group */
+.rou-radio-group {
+  display: flex;
+  gap: 16px;
+  padding-top: 6px;
+}
+.rou-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 500;
+}
+.rou-radio { accent-color: #6366f1; width: 15px; height: 15px; cursor: pointer; }
+.rou-radio-icon { font-size: 0.95rem; }
+
+/* Action buttons */
+.rou-filter-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.rou-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+.rou-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.rou-btn:active { transform: scale(0.97); }
+.rou-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+.rou-btn-primary { background: linear-gradient(135deg, #4f46e5, #6366f1); color: #fff; }
+.rou-btn-primary:hover:not(:disabled) { box-shadow: 0 12px 24px rgba(79, 70, 229, 0.22); }
+.rou-btn-success { background: linear-gradient(135deg, #0f9d78, #10b981); color: #fff; }
+.rou-btn-success:hover:not(:disabled) { box-shadow: 0 12px 24px rgba(15, 157, 120, 0.22); }
+
+/* Table wrapper */
+.rou-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 520px;
+}
+
+/* Table */
+.rou-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.rou-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.rou-table thead tr {
+  background: linear-gradient(90deg, #f8fafc 0%, #eef2ff 100%);
+  border-bottom: 2px solid #dde3f0;
+}
+.rou-table th {
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.rou-row { border-bottom: 1px solid #f1f5f9; transition: background 0.12s; }
+.rou-row:hover { background: #f8fbff; }
+.rou-row:last-child { border-bottom: none; }
+
+.rou-td, .rou-td-center { padding: 10px 14px; vertical-align: top; color: #334155; }
+.rou-td-center { text-align: center; }
+
+.rou-index { color: #94a3b8; font-size: 0.75rem; font-weight: 600; }
+
+.rou-login-chip {
+  background: #f0fdf4;
+  color: #16a34a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+.rou-date { font-weight: 500; white-space: nowrap; }
+.rou-time { color: #94a3b8; font-size: 0.75rem; }
+
+.rou-type-chip {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  background: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+}
+.rou-type-mv_can { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.rou-type-receip { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.rou-type-update { background: #fff7ed; color: #ea580c; border-color: #fed7aa; }
+.rou-type-delete { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+.rou-json {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: #475569;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-width: 280px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 8px;
+  line-height: 1.5;
+}
+
+.rou-reason {
+  font-size: 0.8rem;
+  color: #475569;
+  line-height: 1.5;
+  max-width: 220px;
+}
+
+.rou-empty {
+  text-align: center;
+  padding: 52px 24px;
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+.rou-empty-icon { font-size: 2.2rem; margin-bottom: 10px; }
+</style>

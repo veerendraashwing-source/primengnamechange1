@@ -1,0 +1,305 @@
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isCancelSaving()">
+    @if (isCancelSaving()) {
+      <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-receipt"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">General Receipt Cancel</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="generalReceiptCancelForm" class="nc-form">
+
+      <!-- SECTION A: Receipt Selection -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Receipt</div>
+            <div class="nc-section__desc">Choose branch and receipt number, then fetch details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field">
+            <label class="nc-label">Date</label>
+            <input pInputText class="nc-input nc-input--ro" formControlName="receiptDate" readonly>
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="isInvalid('branchName')">
+            <label class="nc-label">Branch Name<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branchList"
+              optionLabel="branchName"
+              optionValue="branchCode"
+              formControlName="branchName"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branchName"
+              styleClass="nc-select"
+              appendTo="body"
+              (onChange)="branch_change($event.value)">
+            </p-select>
+            @if (isInvalid('branchName')) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Branch is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="isInvalid('receiptId')">
+            <label class="nc-label">Receipt No.<span class="nc-req">*</span></label>
+            <p-select
+              [options]="receiptList"
+              optionLabel="general_receipt_number"
+              optionValue="general_receipt_number"
+              formControlName="receiptId"
+              placeholder="Select receipt"
+              [filter]="true"
+              filterBy="general_receipt_number"
+              styleClass="nc-select"
+              appendTo="body"
+              (onChange)="reveiptnumber_change($event.value)">
+            </p-select>
+            @if (isInvalid('receiptId')) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Receipt No. is required</div>
+            }
+            @if (isCaoDone) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-triangle"></i>Receipt Done in CAO level. Please contact CAO.</div>
+            }
+          </div>
+        </div>
+
+        <div>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--primary"
+            label="Get"
+            icon="pi pi-search"
+            [disabled]="!selectedreciptno || isCancelSaving()"
+            (click)="getReceiptDetails()">
+          </button>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION B: Receipt Details -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Receipt Details</div>
+            <div class="nc-section__desc">Read-only details loaded from the selected receipt</div>
+          </div>
+        </div>
+
+        <div class="nc-readonly-panel">
+          <div class="nc-readonly-panel__header">
+            <i class="pi pi-history"></i>
+            Receipt Details
+            <p-tag styleClass="nc-tag-ro" value="Read-only"></p-tag>
+          </div>
+          <div class="nc-readonly-panel__fields nc-grid-3">
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">CAO Name</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="caoName" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Group Code</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="groupCode" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Ticket No.</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="ticketNo" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Subscriber Name</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="subscriberName" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">MV No.</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="mvNo" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Amount</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="amount" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (showDetails) {
+        <p-divider styleClass="nc-divider"></p-divider>
+
+        <!-- SECTION C: Transaction Voucher Details -->
+        <div class="nc-section">
+          <div class="nc-section__head">
+            <div class="nc-section__letter">C</div>
+            <div>
+              <div class="nc-section__title">Transaction Voucher Details</div>
+              <div class="nc-section__desc">Select the entries to include in the reversal total</div>
+            </div>
+          </div>
+
+          <div class="nc-readonly-panel">
+            <div class="nc-readonly-panel__header">
+              <i class="pi pi-table"></i>
+              Voucher Transactions
+              @if (lstGridRows.length > 0) {
+                <p-tag styleClass="nc-tag-type" [value]="lstGridRows.length + ' records'"></p-tag>
+              }
+            </div>
+
+            <p-table
+              [value]="lstGridRows"
+              [tableStyle]="{'min-width':'100%'}"
+              styleClass="nc-table"
+              [rowHover]="true">
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width:64px; text-align:center;">Select</th>
+                  <th style="width:44px; text-align:center;">#</th>
+                  <th>Txn No.</th>
+                  <th>Particulars</th>
+                  <th style="width:140px; text-align:right;">Debit (₹)</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-row let-i="rowIndex">
+                <tr [class.nc-row--selected]="row.selected">
+                  <td style="text-align:center;">
+                    <p-checkbox
+                      [(ngModel)]="row.selected"
+                      [ngModelOptions]="{standalone:true}"
+                      [binary]="true"
+                      styleClass="nc-checkbox">
+                    </p-checkbox>
+                  </td>
+                  <td style="text-align:center; color: var(--nc-slate-5); font-size: 12px;">
+                    {{ i + 1 }}
+                  </td>
+                  <td>
+                    <p-tag styleClass="nc-tag-type" [value]="row.payment_number"></p-tag>
+                  </td>
+                  <td class="nc-mono">{{ row.contact_name }}</td>
+                  <td class="nc-amount" style="text-align:right; color: var(--nc-red);">
+                    {{ row.ledger_Amount | number:'1.2-2' }}
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="footer">
+                @if (lstGridRows.length > 0) {
+                  <tr>
+                    <td colspan="4" style="text-align:right; font-weight:700;">Total</td>
+                    <td class="nc-amount" style="text-align:right; color: var(--nc-red); font-weight:700;">
+                      {{ getSelectedDebitTotal() | number:'1.2-2' }}
+                    </td>
+                  </tr>
+                }
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="5">
+                    <div class="nc-empty-state">
+                      <i class="pi pi-inbox nc-empty-state__icon"></i>
+                      <div class="nc-empty-state__text">No transaction details found for this receipt</div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+          </div>
+        </div>
+      }
+
+      @if (!isCaoDone) {
+        <p-divider styleClass="nc-divider"></p-divider>
+
+        <!-- SECTION D: Reason -->
+        <div class="nc-section">
+          <div class="nc-section__head">
+            <div class="nc-section__letter">D</div>
+            <div>
+              <div class="nc-section__title">Reason for Cancellation</div>
+              <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+            </div>
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="isInvalid('reason')">
+            <div class="nc-label-row">
+              <label class="nc-label">Reason<span class="nc-req">*</span></label>
+              <span class="nc-char-count"
+                    [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                    [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+                {{ f['reason'].value?.length || 0 }} / 200
+              </span>
+            </div>
+            <textarea
+              pTextarea
+              class="nc-textarea"
+              formControlName="reason"
+              rows="4"
+              placeholder="Enter reason (min 10 characters)..."
+              (keydown)="preventExceedLength($event, 200)">
+            </textarea>
+            @if (isInvalid('reason')) {
+              <div class="nc-error-msg">
+                <i class="pi pi-exclamation-circle"></i>
+                @if (hasError('reason', 'required')) { Reason is required }
+                @if (hasError('reason', 'minlength')) { Minimum 10 characters required }
+                @if (hasError('reason', 'maxlength')) { Maximum 200 characters allowed }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="isCancelSaving()"
+            (click)="clearFormFields()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--danger"
+            label="Cancel Receipt"
+            icon="pi pi-ban"
+            [loading]="isCancelSaving()"
+            [disabled]="isCaoDone"
+            (click)="saveGeneralReceiptCancel()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

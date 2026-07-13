@@ -1,0 +1,194 @@
+<!-- <div class="login-wrapper">
+  <form [formGroup]="form" class="login-card">
+    <h2 class="title">Welcome Back</h2>
+
+    @if (step() === 1) {
+
+      <div class="field">
+        <label><i class="pi pi-building"></i> Company</label>
+        <p-select
+          [options]="companyOptions"
+          formControlName="companyId"
+          placeholder="Select Company"
+          (onChange)="onCompanyChange()"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <div class="field">
+        <label><i class="pi pi-sitemap"></i> Branch</label>
+        <p-select
+          [options]="branchOptions"
+          formControlName="branchCode"
+          placeholder="Select Branch"
+          appendTo="body">
+        </p-select>
+      </div>
+
+      <p-button
+        label="Next"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        (onClick)="nextStep()"
+        [loading]="loading()">
+      </p-button>
+    }
+
+    @if (step() === 2) {
+
+      <div class="field">
+        <label><i class="pi pi-user"></i> Username</label>
+        <input
+          pInputText
+          formControlName="username"
+          placeholder="Enter username">
+      </div>
+
+      <div class="field">
+        <label><i class="pi pi-lock"></i> Password</label>
+        <p-password
+          formControlName="password"
+          [toggleMask]="true"
+          [feedback]="false">
+        </p-password>
+      </div>
+
+      <p-button
+        label="Login"
+        icon="pi pi-sign-in"
+        iconPos="right"
+        (onClick)="login()"
+        [loading]="loading()">
+      </p-button>
+
+      <p-button
+        label="Back"
+        icon="pi pi-arrow-left"
+        styleClass="p-button-text"
+        (onClick)="step.set(1)">
+      </p-button>
+    }
+
+    @if (error()) {
+      <small class="error">
+        <i class="pi pi-exclamation-circle"></i> {{ error() }}
+      </small>
+    }
+
+  </form>
+
+</div>
+
+<p-toast position="bottom-right"></p-toast> -->
+
+<div class="lp-shell">
+  <div class="lp-left">
+    <div class="lp-brand">
+      <div class="lp-brand__logo">
+        <i class="pi pi-sync"></i>
+      </div>
+      <span class="lp-brand__name">EASYCHIT Tools (Changes)</span>
+    </div>
+    <div class="lp-left__content">
+      <h1 class="lp-left__heading">Manage all changes<br>in one place</h1>
+      <p class="lp-left__sub">Secure, audited, and fast updates for name, mobile, address, cheque, auction, and more.</p>
+      <div class="lp-features">
+        <div class="lp-feature">
+          <div class="lp-feature__icon"><i class="pi pi-shield"></i></div>
+          <span>Every change is fully audited</span>
+        </div>
+        <div class="lp-feature">
+          <div class="lp-feature__icon"><i class="pi pi-users"></i></div>
+          <span>Role-based access control</span>
+        </div>
+        <div class="lp-feature">
+          <div class="lp-feature__icon"><i class="pi pi-chart-bar"></i></div>
+          <span>Complete reports and history</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lp-right">
+    <div class="lp-card">
+
+      <div class="lp-card__head">
+        <div class="lp-card__icon">
+          <i class="pi pi-lock"></i>
+        </div>
+        <h2 class="lp-card__title">Sign in</h2>
+        <p class="lp-card__sub">Enter your credentials to continue</p>
+      </div>
+
+      @if (errorMsg()) {
+        <div class="lp-error">
+          <i class="pi pi-exclamation-circle"></i>
+          <span>{{ errorMsg() }}</span>
+        </div>
+      }
+
+      <div class="lp-form">
+
+        <div class="lp-field">
+          <label class="lp-label" for="username">Username</label>
+          <div class="lp-input-wrap">
+            <i class="pi pi-user lp-input-icon"></i>
+            <input
+              id="username"
+              class="lp-input"
+              type="text"
+              placeholder="Enter your username"
+              [ngModel]="username()"
+              (ngModelChange)="username.set($event)"
+              autocomplete="username"
+              [disabled]="loading()"/>
+          </div>
+        </div>
+
+        <div class="lp-field">
+          <label class="lp-label" for="password">Password</label>
+          <div class="lp-input-wrap">
+            <i class="pi pi-key lp-input-icon"></i>
+            <input
+              id="password"
+              class="lp-input"
+              [type]="showPassword() ? 'text' : 'password'"
+              placeholder="Enter your password"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              autocomplete="current-password"
+              [disabled]="loading()"/>
+            <button
+              type="button"
+              class="lp-eye-btn"
+              (click)="togglePassword()"
+              [title]="showPassword() ? 'Hide password' : 'Show password'">
+              <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="lp-submit"
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="loading()">
+          @if (loading()) {
+            <i class="pi pi-spin pi-spinner"></i>
+            <span>Signing in...</span>
+          } @else {
+            <i class="pi pi-sign-in"></i>
+            <span>Sign in</span>
+          }
+        </button>
+
+      </div>
+
+      <div class="lp-card__footer">
+        <i class="pi pi-info-circle"></i>
+        <span>Contact your administrator if you cannot log in.</span>
+      </div>
+
+    </div>
+  </div>
+</div>

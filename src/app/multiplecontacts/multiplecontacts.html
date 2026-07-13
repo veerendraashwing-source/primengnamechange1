@@ -1,0 +1,167 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card">
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-users"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">Multiple Contacts</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="nc-form">
+
+      <!-- SECTION A: Contact Lookup -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Contact Lookup</div>
+            <div class="nc-section__desc">Enter either field and tab out to fetch the contact's chit details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-2">
+          <div class="nc-field">
+            <label class="nc-label">Contact ID<span class="nc-req">*</span></label>
+            <input
+              pInputText
+              type="text"
+              class="nc-input"
+              formControlName="contact_reference_id"
+              placeholder="Enter contact ID"
+              (blur)="onContactIdBlur()">
+          </div>
+
+          <div class="nc-field">
+            <label class="nc-label">Mobile No.<span class="nc-req">*</span></label>
+            <input
+              pInputText
+              type="text"
+              class="nc-input"
+              formControlName="business_entity_contactno"
+              maxlength="10"
+              placeholder="Enter 10-digit mobile no."
+              (keypress)="allowNumbersOnly($event)"
+              (blur)="onMobileBlur()">
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION B: Chit Adjustment -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Chit Adjustment</div>
+            <div class="nc-section__desc">Add up to 10 additional chits for this contact</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field">
+            <label class="nc-label nc-label--sm">No. of Existed Chits</label>
+            <input pInputText class="nc-input nc-input--ro" formControlName="max_chits_per_contact" readonly>
+          </div>
+
+          <div class="nc-field">
+            <label class="nc-label">No. of Required Additional Chits</label>
+            <p-inputNumber
+              formControlName="additionalChits"
+              [min]="0"
+              [max]="10"
+              [showButtons]="true"
+              buttonLayout="stacked"
+              styleClass="nc-inputnumber-wrap"
+              inputStyleClass="nc-input">
+            </p-inputNumber>
+          </div>
+
+          <div class="nc-field">
+            <label class="nc-label nc-label--sm">Total Chits</label>
+            <input pInputText class="nc-input nc-input--auto" formControlName="totalcount" readonly>
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION C: Reason -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">Reason</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label">Reason<span class="nc-req">*</span></label>
+            <span class="nc-char-count"
+                  [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                  [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+              {{ f['reason'].value?.length || 0 }} / 200
+            </span>
+          </div>
+          <textarea
+            pTextarea
+            class="nc-textarea"
+            formControlName="reason"
+            rows="4"
+            placeholder="Enter reason (min 10 characters)...">
+          </textarea>
+          @if (f['reason'].touched && f['reason'].invalid) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i>
+              @if (f['reason'].errors?.['required'])  { Reason is required }
+              @if (f['reason'].errors?.['minlength']) { Minimum 10 characters required }
+              @if (f['reason'].errors?.['maxlength']) { Maximum 200 characters allowed }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            (click)="clear()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="Save Changes"
+            icon="pi pi-check"
+            (click)="save()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

@@ -1,0 +1,281 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="saving()">
+    @if (saving()) {
+      <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-calendar"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">ReAuction Date Change</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="reAuctionDateForm" class="nc-form">
+
+      <!-- SECTION A: Ticket Selection -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Ticket</div>
+            <div class="nc-section__desc">Choose branch, group and ticket to load reauction details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branchlist"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branch_name"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['cao'].touched && f['cao'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Branch is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branch_code"
+              optionLabel="group_Code"
+              optionValue="group_Code"
+              formControlName="group"
+              placeholder="Select group code"
+              [filter]="true"
+              filterBy="group_Code"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['group'].touched && f['group'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['ticket'].touched && f['ticket'].invalid">
+            <label class="nc-label">Ticket No<span class="nc-req">*</span></label>
+            <p-select
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket no"
+              [filter]="true"
+              filterBy="ticketno"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['ticket'].touched && f['ticket'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Ticket No is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION B: Current Details -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Current Details</div>
+            <div class="nc-section__desc">Read-only details loaded from the selected ticket</div>
+          </div>
+        </div>
+
+        <div class="nc-readonly-panel">
+          <div class="nc-readonly-panel__header">
+            <i class="pi pi-history"></i>
+            Current Details
+            <p-tag styleClass="nc-tag-ro" value="Read-only"></p-tag>
+          </div>
+          <div class="nc-readonly-panel__fields nc-grid-3">
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Subscriber Name</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="subscriberName" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">ReAuction Date</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="reAuctionDate" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION C: New ReAuction Date -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">New ReAuction Date</div>
+            <div class="nc-section__desc">Select the new reauction date</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['newReAuctionDate'].touched && f['newReAuctionDate'].invalid">
+            <label class="nc-label">New ReAuction Date<span class="nc-req">*</span></label>
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-calendar"></p-inputicon>
+              <p-datepicker
+                formControlName="newReAuctionDate"
+                dateFormat="dd-mm-yy"
+                [showIcon]="true"
+                [readonlyInput]="true"
+                inputStyleClass="nc-input nc-input--picker-only"
+                styleClass="nc-datepicker"
+                appendTo="body"
+                placeholder="Select date">
+              </p-datepicker>
+            </p-iconfield>
+            @if (f['newReAuctionDate'].touched && f['newReAuctionDate'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>New ReAuction Date is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION D: Reason -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">D</div>
+          <div>
+            <div class="nc-section__title">Reason for Change</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="reasonRequired || reasonMinLength">
+          <div class="nc-label-row">
+            <label class="nc-label">Reason<span class="nc-req">*</span></label>
+            <span class="nc-char-count"
+                  [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                  [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+              {{ f['reason'].value?.length || 0 }} / 200
+            </span>
+          </div>
+          <textarea
+            pTextarea
+            class="nc-textarea"
+            formControlName="reason"
+            rows="4"
+            maxlength="200"
+            placeholder="Explain why this reauction date is being changed..."
+            (keydown)="preventExceedLength($event, 200)">
+          </textarea>
+          @if (reasonRequired) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Reason is required</div>
+          }
+          @if (reasonMinLength) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Reason must be at least 10 characters</div>
+          }
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="saving()"
+            (click)="clear()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="Save Changes"
+            icon="pi pi-check-circle"
+            [loading]="saving()"
+            (click)="save()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}
+
+<!-- ── Custom Confirm Modal (matches nc- design system) ── -->
+@if (showConfirmModal) {
+  <div class="nc-confirm-backdrop" (click)="cancelConfirm()">
+    <div class="nc-confirm-modal" (click)="$event.stopPropagation()">
+
+      <div class="nc-confirm-modal__header">
+        <div class="nc-confirm-modal__header-left">
+          <span class="nc-confirm-modal__icon"><i class="pi pi-calendar"></i></span>
+          <h5>Confirm ReAuction Date Change</h5>
+        </div>
+        <button type="button" class="nc-confirm-modal__close" (click)="cancelConfirm()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="nc-confirm-modal__body">
+        <p class="nc-confirm-modal__lead">
+          You're about to update the reauction date for this ticket. Please review before confirming.
+        </p>
+
+        <div class="nc-confirm-modal__transition">
+          <div class="nc-confirm-modal__branch">
+            <p class="nc-confirm-modal__branch-label">Old ReAuction Date</p>
+            <p class="nc-confirm-modal__branch-value">{{ pendingOldDate || '—' }}</p>
+          </div>
+          <span class="nc-confirm-modal__arrow"><i class="pi pi-arrow-right"></i></span>
+          <div class="nc-confirm-modal__branch">
+            <p class="nc-confirm-modal__branch-label">New ReAuction Date</p>
+            <p class="nc-confirm-modal__branch-value nc-confirm-modal__branch-value--new">{{ pendingNewDate }}</p>
+          </div>
+        </div>
+
+        <div class="nc-confirm-modal__reason">
+          <i class="pi pi-info-circle"></i>
+          <span>This action will be recorded in the audit log with the reason: "{{ pendingReason }}"</span>
+        </div>
+      </div>
+
+      <div class="nc-confirm-modal__footer">
+        <button type="button" class="nc-confirm-modal__btn-cancel" (click)="cancelConfirm()">
+          Cancel
+        </button>
+        <button type="button" class="nc-confirm-modal__btn-confirm" [disabled]="saving()" (click)="confirmSave()">
+          <i class="pi pi-check"></i> Yes, Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

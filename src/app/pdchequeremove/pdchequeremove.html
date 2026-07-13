@@ -1,0 +1,217 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isSaving">
+    @if (isSaving) {
+      <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-trash"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Cheque Management</div>
+          <div class="nc-card__title">PD Cheque Remove</div>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="pDChequeForm" class="nc-form">
+
+      <!-- SECTION A: Ticket Selection -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Ticket</div>
+            <div class="nc-section__desc">Choose branch, group code and ticket to load cheque records</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branchlist"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branch_name"
+              styleClass="nc-select"
+              appendTo="body"
+              (onHide)="f['cao'].markAsTouched()">
+            </p-select>
+            @if (f['cao'].touched && f['cao'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>CAO is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select
+              [options]="groupList"
+              optionLabel="groupcode"
+              optionValue="groupcode"
+              formControlName="group"
+              placeholder="Select group"
+              [filter]="true"
+              filterBy="groupcode"
+              styleClass="nc-select"
+              appendTo="body"
+              (onHide)="f['group'].markAsTouched()">
+              <ng-template let-item pTemplate="item">
+                <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <span>{{ item.groupcode }}</span>
+                  <p-tag
+                    [value]="item.chitgroup_status"
+                    [severity]="item.chitgroup_status === 'Commenced' ? 'success' : 'secondary'"
+                    styleClass="nc-tag-type">
+                  </p-tag>
+                </div>
+              </ng-template>
+            </p-select>
+            @if (f['group'].touched && f['group'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['ticket'].touched && f['ticket'].invalid">
+            <label class="nc-label">Ticket No<span class="nc-req">*</span></label>
+            <p-select
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket"
+              [filter]="true"
+              filterBy="ticketno"
+              styleClass="nc-select"
+              appendTo="body"
+              (onHide)="f['ticket'].markAsTouched()">
+            </p-select>
+            @if (f['ticket'].touched && f['ticket'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Ticket No is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (chequeRecords.length > 0 || f['ticket'].value) {
+        <p-divider styleClass="nc-divider"></p-divider>
+      }
+
+      <!-- SECTION B: Cheque Records -->
+      @if (chequeRecords.length > 0) {
+        <div class="nc-section">
+          <div class="nc-section__head">
+            <div class="nc-section__letter">B</div>
+            <div>
+              <div class="nc-section__title">Cheque Records</div>
+              <div class="nc-section__desc">Select one or more records to remove</div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:-4px;">
+            @if (selectedCheques.length > 0) {
+              <p-tag
+                [value]="selectedCheques.length + ' record(s) selected'"
+                severity="info"
+                styleClass="nc-tag-progress">
+              </p-tag>
+            }
+          </div>
+
+          <p-table
+            [value]="chequeRecords"
+            [(selection)]="selectedCheques"
+            dataKey="tbl_trans_ps_cheques_id"
+            selectionMode="multiple"
+            [paginator]="chequeRecords.length > 10"
+            [rows]="10"
+            styleClass="nc-table"
+            [tableStyle]="{ 'min-width': '40rem' }"
+            [rowHover]="true">
+
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="width: 4rem; text-align:center;">
+                  <p-tableHeaderCheckbox styleClass="nc-checkbox" />
+                </th>
+                <th>Cheque No</th>
+                <th>Bank</th>
+                <th>Branch</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-row>
+              <tr [class.nc-row--selected]="selectedCheques.includes(row)">
+                <td style="text-align:center;">
+                  <p-tableCheckbox [value]="row" styleClass="nc-checkbox" />
+                </td>
+                <td class="nc-mono">{{ row.cheque_number }}</td>
+                <td>{{ row.bank_name }}</td>
+                <td>{{ row.branch_name }}</td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="4">
+                  <div class="nc-empty-state">
+                    <i class="pi pi-inbox nc-empty-state__icon"></i>
+                    <div class="nc-empty-state__text">No cheque records found.</div>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+
+          </p-table>
+        </div>
+      }
+
+      <!-- Empty state -->
+      @if (f['ticket'].value && chequeRecords.length === 0) {
+        <div class="nc-empty-state">
+          <i class="pi pi-info-circle nc-empty-state__icon"></i>
+          <div class="nc-empty-state__text">No cheque records found for the selected ticket.</div>
+        </div>
+      }
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="isSaving"
+            (click)="clear()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--danger"
+            [label]="selectedCheques.length > 0 ? 'Delete (' + selectedCheques.length + ')' : 'Delete'"
+            icon="pi pi-trash"
+            [loading]="isSaving"
+            [disabled]="selectedCheques.length === 0"
+            (click)="confirmDelete()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

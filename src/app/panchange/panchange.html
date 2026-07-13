@@ -1,0 +1,166 @@
+<div class="nc-page">
+    <div class="nc-grid-texture"></div>
+
+    <div class="nc-card" [class.nc-card--saving]="isCancelSaving">
+        @if (isCancelSaving) {
+        <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+        }
+
+        <div class="nc-card__header">
+            <div class="nc-card__title-group">
+                <div class="nc-card__icon-wrap">
+                    <i class="pi pi-id-card"></i>
+                </div>
+                <div>
+                    <div class="nc-card__subtitle">Change Request</div>
+                    <div class="nc-card__title">PAN Change</div>
+                </div>
+            </div>
+            <div class="nc-card__header-right">
+                <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+            </div>
+        </div>
+
+        <form [formGroup]="pANChangeForm" class="nc-form">
+
+            <!-- COMPARE: Existing vs New -->
+            <div class="nc-compare">
+
+                <!-- OLD COLUMN -->
+                <div class="nc-compare__col nc-compare__col--old">
+                    <div class="nc-compare__col-header">
+                        <i class="pi pi-history"></i>
+                        Existing PAN
+                    </div>
+                    <div class="nc-compare__fields">
+
+                        <div class="nc-field" [class.nc-field--error]="isInvalid('panno')">
+                            <label class="nc-label">PAN No.<span class="nc-req">*</span></label>
+                            <p-select [options]="panList" optionLabel="pan_number" optionValue="pan_number"
+                                formControlName="panno" placeholder="Select PAN" [filter]="true" filterBy="pan_number"
+                                [virtualScroll]="true" [virtualScrollItemSize]="42"
+                                styleClass="nc-select" appendTo="body" (onChange)="reveiptnumber_change($event.value)">
+                            </p-select>
+                            @if (isInvalid('panno')) {
+                            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>PAN No. is required</div>
+                            }
+                        </div>
+
+                        <div class="nc-field">
+                            <div class="nc-label-row">
+                                <label class="nc-label nc-label--sm">Subscriber Name<p-tag styleClass="nc-tag-ro"
+                                        value="Read-only"></p-tag></label>
+                                @if (isLoadingDetails) {
+                                <span class="nc-auto-badge"><i class="pi pi-spin pi-spinner"></i>Loading</span>
+                                }
+                            </div>
+                            <input pInputText class="nc-input nc-input--ro nc-input--plain" formControlName="subscName" readonly>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ARROW -->
+                <div class="nc-compare__arrow">
+                    <div class="nc-arrow-beam">
+                        <span class="nc-arrow-beam__dot"></span>
+                        <span class="nc-arrow-beam__track"></span>
+                        <i class="pi pi-angle-right nc-arrow-beam__head"></i>
+                    </div>
+                    <span class="nc-arrow-beam__label">Changes to</span>
+                </div>
+
+                <!-- NEW COLUMN -->
+                <div class="nc-compare__col nc-compare__col--new">
+                    <div class="nc-compare__col-header">
+                        <i class="pi pi-check-circle"></i>
+                        New PAN
+                        <p-tag styleClass="nc-tag-edit" value="Editable"></p-tag>
+                    </div>
+                    <div class="nc-compare__fields">
+
+                        <div class="nc-field"
+                            [class.nc-field--error]="isInvalid('newPanNo') || hasFormError('samePAN') || hasFormError('panExists')">
+                            <label class="nc-label">New PAN Number<span class="nc-req">*</span></label>
+                            <input pInputText class="nc-input nc-input--plain" formControlName="newPanNo" placeholder="e.g. ABCDE1234F"
+                                maxlength="10" (input)="onNewPanInput($event)">
+                            @if (isInvalid('newPanNo') && hasError('newPanNo', 'required')) {
+                            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>New PAN Number is required
+                            </div>
+                            }
+                            @if (isInvalid('newPanNo') && hasError('newPanNo', 'pattern')) {
+                            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Invalid PAN format (e.g.
+                                ABCDE1234F)</div>
+                            }
+                            @if (hasFormError('samePAN')) {
+                            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Old and New PAN Numbers
+                                cannot be the same</div>
+                            }
+                            @if (hasFormError('panExists')) {
+                            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>This PAN Number already
+                                exists in the system</div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            @if (!isCaoDone) {
+            <p-divider styleClass="nc-divider"></p-divider>
+
+            <!-- SECTION: Reason -->
+            <div class="nc-section">
+                <div class="nc-section__head">
+                    <div class="nc-section__letter">B</div>
+                    <div>
+                        <div class="nc-section__title">Reason for Change</div>
+                        <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nc-field" [class.nc-field--error]="isInvalid('reason')">
+                    <div class="nc-label-row">
+                        <label class="nc-label">Reason<span class="nc-req">*</span></label>
+                        <span class="nc-char-count" [class.nc-char-count--ok]="(f['reason'].value?.length ?? 0) >= 10"
+                            [class.nc-char-count--warn]="(f['reason'].value?.length ?? 0) > 180">
+                            {{ f['reason'].value?.length ?? 0 }} / 200
+                        </span>
+                    </div>
+                    <textarea pTextarea class="nc-textarea" formControlName="reason" rows="4"
+                        placeholder="Enter reason (min 10 characters)..." (keydown)="preventExceedLength($event, 200)">
+            </textarea>
+                    @if (isInvalid('reason')) {
+                    <div class="nc-error-msg">
+                        <i class="pi pi-exclamation-circle"></i>
+                        @if (hasError('reason', 'required')) { Reason is required }
+                        @if (hasError('reason', 'minlength')) { Minimum 10 characters required }
+                        @if (hasError('reason', 'maxlength')) { Maximum 200 characters allowed }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- ACTION BAR -->
+            <div class="nc-action-bar">
+                <div class="nc-action-bar__left">
+                    <i class="pi pi-info-circle"></i>
+                    <span>Fields marked with <strong>*</strong> are required</span>
+                </div>
+                <div class="nc-action-bar__right">
+                    <button pButton type="button" class="nc-btn nc-btn--clear" label="Clear" icon="pi pi-refresh"
+                        [disabled]="isCancelSaving" (click)="clearFormFields()">
+                    </button>
+                    <button pButton type="button" class="nc-btn nc-btn--save" label="Save Changes" icon="pi pi-check"
+                        [loading]="isCancelSaving" [disabled]="isCaoDone || isLoadingDetails"
+                        (click)="saveGeneralReceiptCancel()">
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>

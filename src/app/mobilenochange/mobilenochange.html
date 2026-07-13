@@ -1,0 +1,921 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="saving()">
+    @if (saving()) {
+      <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-phone"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">Mobile & Address Change</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="contactChangeForm" class="nc-form">
+
+      <!-- SECTION A: Ticket Selection -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Ticket</div>
+            <div class="nc-section__desc">Choose branch, group and ticket to load member details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="isInvalid('cao')">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branch_name"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branch_name"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (isInvalid('cao')) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Branch is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="isInvalid('group')">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branch_code"
+              optionLabel="group_Code"
+              optionValue="group_Code"
+              formControlName="group"
+              placeholder="Select group code"
+              [filter]="true"
+              filterBy="group_Code"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (isInvalid('group')) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="isInvalid('ticket')">
+            <label class="nc-label">Ticket No<span class="nc-req">*</span></label>
+            <p-select
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket no"
+              [filter]="true"
+              filterBy="ticketno"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (isInvalid('ticket')) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Ticket No is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Current Details</div>
+            <div class="nc-section__desc">Read-only details loaded from the selected ticket</div>
+          </div>
+        </div>
+
+        <div class="nc-readonly-panel">
+          <div class="nc-readonly-panel__header">
+            <i class="pi pi-history"></i>
+            Current Details
+            <p-tag styleClass="nc-tag-ro" value="Read-only"></p-tag>
+          </div>
+          <div class="nc-readonly-panel__fields nc-grid-4">
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Name</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="name" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Mobile</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="mobNo" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Address</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="address" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Area</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="area" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">City</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="city" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Pincode</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="pincode" readonly>
+            </div>
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm">Status</label>
+              <input pInputText class="nc-input nc-input--ro" formControlName="oldStatus" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION C: Type of Change -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">Type of Change</div>
+            <div class="nc-section__desc">Select whether you're updating the mobile number or the address</div>
+          </div>
+        </div>
+
+        <div class="nc-change-type-group">
+          <label class="nc-change-type-card" [class.nc-change-type-card--active]="f['changeType'].value === 'MOBILE'">
+            <input class="nc-radio-hidden" type="radio" value="MOBILE" formControlName="changeType">
+            <div class="nc-change-type-card__icon"><i class="pi pi-phone"></i></div>
+            <div class="nc-change-type-card__body">
+              <div class="nc-change-type-card__title">Mobile Number</div>
+              <div class="nc-change-type-card__desc">Update the registered mobile number</div>
+            </div>
+            <i class="pi pi-check-circle nc-change-type-card__check"></i>
+          </label>
+
+          <label class="nc-change-type-card" [class.nc-change-type-card--active]="f['changeType'].value === 'ADDRESS'">
+            <input class="nc-radio-hidden" type="radio" value="ADDRESS" formControlName="changeType">
+            <div class="nc-change-type-card__icon"><i class="pi pi-map-marker"></i></div>
+            <div class="nc-change-type-card__body">
+              <div class="nc-change-type-card__title">Address</div>
+              <div class="nc-change-type-card__desc">Update address, area, city and pincode</div>
+            </div>
+            <i class="pi pi-check-circle nc-change-type-card__check"></i>
+          </label>
+        </div>
+        @if (isInvalid('changeType')) {
+          <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Please select change type</div>
+        }
+      </div>
+
+      @if (isMobileChange) {
+        <p-divider styleClass="nc-divider"></p-divider>
+        <div class="nc-section">
+          <div class="nc-section__head">
+            <div class="nc-section__letter">D</div>
+            <div>
+              <div class="nc-section__title">New Mobile Number</div>
+              <div class="nc-section__desc">Enter the new 10-digit mobile number</div>
+            </div>
+          </div>
+          <div class="nc-grid-3">
+            <div class="nc-field" [class.nc-field--error]="isInvalid('newMobileNo')">
+              <label class="nc-label">New Mobile No.<span class="nc-req">*</span></label>
+              <input
+                pInputText
+                class="nc-input"
+                formControlName="newMobileNo"
+                maxlength="10"
+                placeholder="Enter new mobile number"
+                (input)="allowOnlyDigits('newMobileNo', 10)"
+                (keydown)="preventExceedLength($event, 10)">
+              @if (isInvalid('newMobileNo')) {
+                <div class="nc-error-msg">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (hasError('newMobileNo', 'required')) { Mobile number is required }
+                  @if (hasError('newMobileNo', 'pattern')) { Enter a valid 10-digit mobile number }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (isAddressChange) {
+        <p-divider styleClass="nc-divider"></p-divider>
+        <div class="nc-section">
+          <div class="nc-section__head">
+            <div class="nc-section__letter">D</div>
+            <div>
+              <div class="nc-section__title">New Address</div>
+              <div class="nc-section__desc">Enter the updated address details</div>
+            </div>
+          </div>
+          <div class="nc-grid-4">
+            <div class="nc-field" [class.nc-field--error]="isInvalid('newAddress')">
+              <label class="nc-label">New Address<span class="nc-req">*</span></label>
+              <input pInputText class="nc-input" formControlName="newAddress" placeholder="Enter new address" (keydown)="preventExceedLength($event, 100)">
+              @if (isInvalid('newAddress')) {
+                <div class="nc-error-msg">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (hasError('newAddress', 'required')) { Address is required }
+                  @if (hasError('newAddress', 'maxlength')) { Max 100 characters allowed }
+                </div>
+              }
+            </div>
+
+            <div class="nc-field" [class.nc-field--error]="isInvalid('newArea')">
+              <label class="nc-label">New Area<span class="nc-req">*</span></label>
+              <input pInputText class="nc-input" formControlName="newArea" placeholder="Enter new area" (keydown)="preventExceedLength($event, 50)">
+              @if (isInvalid('newArea')) {
+                <div class="nc-error-msg">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (hasError('newArea', 'required')) { Area is required }
+                  @if (hasError('newArea', 'maxlength')) { Max 50 characters allowed }
+                </div>
+              }
+            </div>
+
+            <div class="nc-field" [class.nc-field--error]="isInvalid('newCity')">
+              <label class="nc-label">New City<span class="nc-req">*</span></label>
+              <input pInputText class="nc-input" formControlName="newCity" placeholder="Enter new city" (keydown)="preventExceedLength($event, 50)">
+              @if (isInvalid('newCity')) {
+                <div class="nc-error-msg">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (hasError('newCity', 'required')) { City is required }
+                  @if (hasError('newCity', 'maxlength')) { Max 50 characters allowed }
+                </div>
+              }
+            </div>
+
+            <div class="nc-field" [class.nc-field--error]="isInvalid('newPincode')">
+              <label class="nc-label">New Pincode<span class="nc-req">*</span></label>
+              <input
+                pInputText
+                class="nc-input"
+                formControlName="newPincode"
+                maxlength="6"
+                placeholder="Enter new pincode"
+                (input)="allowOnlyDigits('newPincode', 6)"
+                (keydown)="preventExceedLength($event, 6)">
+              @if (isInvalid('newPincode')) {
+                <div class="nc-error-msg">
+                  <i class="pi pi-exclamation-circle"></i>
+                  @if (hasError('newPincode', 'required')) { Pincode is required }
+                  @if (hasError('newPincode', 'pattern')) { Enter a valid 6-digit pincode }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION: Reason -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">E</div>
+          <div>
+            <div class="nc-section__title">Reason for Change</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="isInvalid('reason')">
+          <div class="nc-label-row">
+            <label class="nc-label">Reason<span class="nc-req">*</span></label>
+            <span class="nc-char-count"
+                  [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                  [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+              {{ f['reason'].value?.length || 0 }} / 200
+            </span>
+          </div>
+          <textarea
+            pTextarea
+            class="nc-textarea"
+            formControlName="reason"
+            rows="4"
+            placeholder="Explain why this change is being made..."
+            (keydown)="preventExceedLength($event, 200)">
+          </textarea>
+          @if (isInvalid('reason')) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i>
+              @if (hasError('reason', 'required')) { Reason is required }
+              @if (hasError('reason', 'minlength')) { Minimum 10 characters required }
+              @if (hasError('reason', 'maxlength')) { Max 200 characters allowed }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="saving()"
+            (click)="clearFormFields()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="Save Changes"
+            icon="pi pi-check"
+            [loading]="saving()"
+            (click)="saveRecord()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}
+
+
+
+
+
+<!-- 
+<p-toast position="top-right" />
+<p-confirmDialog styleClass="nc-confirm" />
+
+@if (showForm) {
+
+<div class="nc-page">
+
+  <div class="nc-grid-texture" aria-hidden="true"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isSaving">
+
+    <div class="nc-card__header">
+
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-mobile"></i>
+        </div>
+        <div>
+          <p class="nc-card__subtitle">Member Administration</p>
+          <h2 class="nc-card__title">Mobile &amp; Address Change</h2>
+        </div>
+      </div>
+
+      <div class="nc-card__header-right">
+        <p-tag
+          value="In Progress"
+          icon="pi pi-clock"
+          styleClass="nc-tag-progress" />
+
+        <div class="nc-steps-indicator">
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Branch Selection"  tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Contact Details"   tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--active" pTooltip="Review & Submit"  tooltipPosition="bottom"></span>
+        </div>
+      </div>
+
+    </div>
+
+    @if (isSaving) {
+      <p-progressbar mode="indeterminate" styleClass="nc-saving-bar" />
+    }
+
+    <form [formGroup]="contactChangeForm" class="nc-form" autocomplete="off">
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">A</span>
+          <div>
+            <p class="nc-section__title">Selection</p>
+            <p class="nc-section__desc">Choose the branch, group and associated ticket</p>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label" for="cao">
+              <i class="pi pi-building"></i> CAO Branch
+              <span class="nc-req">*</span>
+            </label>
+            <p-select
+              inputId="cao"
+              [options]="branch_name"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch…"
+              [showClear]="true"
+              styleClass="nc-select"
+              appendTo="body"
+              [filter]="true"
+              filterPlaceholder="Search branch" />
+            @if (f['cao'].touched && f['cao'].invalid) {
+              <span class="nc-error-msg">
+                <i class="pi pi-exclamation-triangle"></i> Required
+              </span>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label" for="group">
+              <i class="pi pi-sitemap"></i> Group Code
+              <span class="nc-req">*</span>
+            </label>
+            <p-select
+              inputId="group"
+              [options]="branch_code"
+              optionLabel="group_Code"
+              optionValue="group_Code"
+              formControlName="group"
+              placeholder="Select group…"
+              [showClear]="true"
+              styleClass="nc-select"
+              appendTo="body"
+              [pTooltip]="!f['cao'].value ? 'Select a CAO first' : ''"
+              tooltipPosition="top" />
+            @if (f['group'].touched && f['group'].invalid) {
+              <span class="nc-error-msg">
+                <i class="pi pi-exclamation-triangle"></i> Required
+              </span>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['ticket'].touched && f['ticket'].invalid">
+            <label class="nc-label" for="ticket">
+              <i class="pi pi-ticket"></i> Ticket No.
+              <span class="nc-req">*</span>
+            </label>
+            <p-select
+              inputId="ticket"
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket…"
+              [showClear]="true"
+              styleClass="nc-select"
+              appendTo="body"
+              [pTooltip]="!f['group'].value ? 'Select a Group first' : ''"
+              tooltipPosition="top" />
+            @if (f['ticket'].touched && f['ticket'].invalid) {
+              <span class="nc-error-msg">
+                <i class="pi pi-exclamation-triangle"></i> Required
+              </span>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider" />
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">B</span>
+          <div>
+            <p class="nc-section__title">Current Record</p>
+            <p class="nc-section__desc">Existing contact details fetched from the selected ticket</p>
+          </div>
+        </div>
+
+        <div class="nc-readonly-panel">
+          <div class="nc-readonly-panel__header">
+            <i class="pi pi-lock"></i>
+            <span>Current Information</span>
+            <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+          </div>
+
+          <div class="nc-grid-3 nc-readonly-panel__fields">
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-user"></i> Name</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-user" />
+                <input pInputText formControlName="name" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-phone"></i> Mobile</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-phone" />
+                <input pInputText formControlName="mobNo" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-map-marker"></i> Address</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-map-marker" />
+                <input pInputText formControlName="address" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-map"></i> Area</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-map" />
+                <input pInputText formControlName="area" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> City</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-building" />
+                <input pInputText formControlName="city" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+            <div class="nc-field">
+              <label class="nc-label nc-label--sm"><i class="pi pi-inbox"></i> Pincode</label>
+              <p-iconfield>
+                <p-inputicon styleClass="pi pi-inbox" />
+                <input pInputText formControlName="pincode" placeholder="—" readonly class="nc-input nc-input--ro" />
+              </p-iconfield>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <p-divider styleClass="nc-divider" />
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">C</span>
+          <div>
+            <p class="nc-section__title">Type of Change</p>
+            <p class="nc-section__desc">Select what you want to update for this member</p>
+          </div>
+        </div>
+
+        <div class="nc-change-type-group" [class.nc-field--error]="f['changeType'].touched && f['changeType'].invalid">
+
+          <label class="nc-change-type-card" [class.nc-change-type-card--active]="f['changeType'].value === 'MOBILE'">
+            <input type="radio" value="MOBILE" formControlName="changeType" class="nc-radio-hidden" />
+            <div class="nc-change-type-card__icon">
+              <i class="pi pi-mobile"></i>
+            </div>
+            <div class="nc-change-type-card__body">
+              <span class="nc-change-type-card__title">Mobile Number</span>
+              <span class="nc-change-type-card__desc">Update contact phone number</span>
+            </div>
+            <div class="nc-change-type-card__check">
+              <i class="pi pi-check-circle"></i>
+            </div>
+          </label>
+
+          <label class="nc-change-type-card" [class.nc-change-type-card--active]="f['changeType'].value === 'ADDRESS'">
+            <input type="radio" value="ADDRESS" formControlName="changeType" class="nc-radio-hidden" />
+            <div class="nc-change-type-card__icon">
+              <i class="pi pi-map-marker"></i>
+            </div>
+            <div class="nc-change-type-card__body">
+              <span class="nc-change-type-card__title">Address</span>
+              <span class="nc-change-type-card__desc">Update residential / mailing address</span>
+            </div>
+            <div class="nc-change-type-card__check">
+              <i class="pi pi-check-circle"></i>
+            </div>
+          </label>
+
+        </div>
+
+        @if (f['changeType'].touched && f['changeType'].invalid) {
+          <span class="nc-error-msg">
+            <i class="pi pi-exclamation-triangle"></i> Please select a change type
+          </span>
+        }
+
+      </div>
+
+      @if (isMobileChange || isAddressChange) {
+
+        <p-divider styleClass="nc-divider" />
+
+        <div class="nc-section">
+
+          <div class="nc-section__head">
+            <span class="nc-section__letter">D</span>
+            <div>
+              <p class="nc-section__title">New Details</p>
+              <p class="nc-section__desc">
+                @if (isMobileChange) { Enter the new mobile number }
+                @if (isAddressChange) { Enter the updated address information }
+              </p>
+            </div>
+          </div>
+
+          @if (isMobileChange) {
+            <div class="nc-compare">
+
+              <div class="nc-compare__col nc-compare__col--old">
+                <div class="nc-compare__col-header">
+                  <i class="pi pi-lock"></i>
+                  <span>Current Mobile</span>
+                  <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+                </div>
+                <div class="nc-compare__fields">
+                  <div class="nc-field">
+                    <label class="nc-label nc-label--sm"><i class="pi pi-phone"></i> Mobile No.</label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-phone" />
+                      <input pInputText formControlName="mobNo" placeholder="—" readonly class="nc-input nc-input--ro" />
+                    </p-iconfield>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nc-compare__arrow" aria-hidden="true">
+                <div class="nc-arrow-beam">
+                  <span class="nc-arrow-beam__dot"></span>
+                  <span class="nc-arrow-beam__track"></span>
+                  <i class="pi pi-arrow-right nc-arrow-beam__head"></i>
+                </div>
+                <span class="nc-arrow-beam__label">UPDATING</span>
+              </div>
+
+              <div class="nc-compare__col nc-compare__col--new">
+                <div class="nc-compare__col-header">
+                  <i class="pi pi-file-edit"></i>
+                  <span>New Mobile</span>
+                  <p-tag value="Editable" severity="info" styleClass="nc-tag-edit" />
+                </div>
+                <div class="nc-compare__fields">
+                  <div class="nc-field" [class.nc-field--error]="isInvalid('newMobileNo')">
+                    <label class="nc-label nc-label--sm">Mobile No. <span class="nc-req">*</span></label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-pencil" />
+                      <input pInputText
+                        formControlName="newMobileNo"
+                        placeholder="Enter 10-digit mobile"
+                        maxlength="10"
+                        class="nc-input nc-input--editable"
+                        (input)="allowOnlyDigits('newMobileNo', 10)"
+                        (keydown)="preventExceedLength($event, 10)" />
+                    </p-iconfield>
+                    @if (isInvalid('newMobileNo')) {
+                      <span class="nc-error-msg">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        @if (hasError('newMobileNo','required')) { Required }
+                        @else { Enter valid mobile number }
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          }
+
+          @if (isAddressChange) {
+            <div class="nc-compare">
+
+              <div class="nc-compare__col nc-compare__col--old">
+                <div class="nc-compare__col-header">
+                  <i class="pi pi-lock"></i>
+                  <span>Current Address</span>
+                  <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+                </div>
+                <div class="nc-compare__fields">
+                  <div class="nc-field">
+                    <label class="nc-label nc-label--sm"><i class="pi pi-map-marker"></i> Address</label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-map-marker" />
+                      <input pInputText formControlName="address" placeholder="—" readonly class="nc-input nc-input--ro" />
+                    </p-iconfield>
+                  </div>
+                  <div class="nc-field">
+                    <label class="nc-label nc-label--sm"><i class="pi pi-map"></i> Area</label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-map" />
+                      <input pInputText formControlName="area" placeholder="—" readonly class="nc-input nc-input--ro" />
+                    </p-iconfield>
+                  </div>
+                  <div class="nc-field">
+                    <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> City</label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-building" />
+                      <input pInputText formControlName="city" placeholder="—" readonly class="nc-input nc-input--ro" />
+                    </p-iconfield>
+                  </div>
+                  <div class="nc-field">
+                    <label class="nc-label nc-label--sm"><i class="pi pi-inbox"></i> Pincode</label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-inbox" />
+                      <input pInputText formControlName="pincode" placeholder="—" readonly class="nc-input nc-input--ro" />
+                    </p-iconfield>
+                  </div>
+                </div>
+              </div>
+
+              <div class="nc-compare__arrow" aria-hidden="true">
+                <div class="nc-arrow-beam">
+                  <span class="nc-arrow-beam__dot"></span>
+                  <span class="nc-arrow-beam__track"></span>
+                  <i class="pi pi-arrow-right nc-arrow-beam__head"></i>
+                </div>
+                <span class="nc-arrow-beam__label">UPDATING</span>
+              </div>
+
+              <div class="nc-compare__col nc-compare__col--new">
+                <div class="nc-compare__col-header">
+                  <i class="pi pi-file-edit"></i>
+                  <span>New Address</span>
+                  <p-tag value="Editable" severity="info" styleClass="nc-tag-edit" />
+                </div>
+                <div class="nc-compare__fields">
+
+                  <div class="nc-field" [class.nc-field--error]="isInvalid('newAddress')">
+                    <label class="nc-label nc-label--sm">Address <span class="nc-req">*</span></label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-pencil" />
+                      <input pInputText formControlName="newAddress" placeholder="Enter new address"
+                        class="nc-input nc-input--editable"
+                        (keydown)="preventExceedLength($event, 100)" />
+                    </p-iconfield>
+                    @if (isInvalid('newAddress')) {
+                      <span class="nc-error-msg">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        @if (hasError('newAddress','required')) { Required }
+                        @else { Max 100 characters }
+                      </span>
+                    }
+                  </div>
+
+                  <div class="nc-field" [class.nc-field--error]="isInvalid('newArea')">
+                    <label class="nc-label nc-label--sm">Area <span class="nc-req">*</span></label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-pencil" />
+                      <input pInputText formControlName="newArea" placeholder="Enter new area"
+                        class="nc-input nc-input--editable"
+                        (keydown)="preventExceedLength($event, 50)" />
+                    </p-iconfield>
+                    @if (isInvalid('newArea')) {
+                      <span class="nc-error-msg">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        @if (hasError('newArea','required')) { Required }
+                        @else { Max 50 characters }
+                      </span>
+                    }
+                  </div>
+
+                  <div class="nc-field" [class.nc-field--error]="isInvalid('newCity')">
+                    <label class="nc-label nc-label--sm">City <span class="nc-req">*</span></label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-pencil" />
+                      <input pInputText formControlName="newCity" placeholder="Enter new city"
+                        class="nc-input nc-input--editable"
+                        (keydown)="preventExceedLength($event, 50)" />
+                    </p-iconfield>
+                    @if (isInvalid('newCity')) {
+                      <span class="nc-error-msg">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        @if (hasError('newCity','required')) { Required }
+                        @else { Max 50 characters }
+                      </span>
+                    }
+                  </div>
+
+                  <div class="nc-field" [class.nc-field--error]="isInvalid('newPincode')">
+                    <label class="nc-label nc-label--sm">Pincode <span class="nc-req">*</span></label>
+                    <p-iconfield>
+                      <p-inputicon styleClass="pi pi-pencil" />
+                      <input pInputText formControlName="newPincode" placeholder="6-digit pincode"
+                        maxlength="6"
+                        class="nc-input nc-input--editable"
+                        (input)="allowOnlyDigits('newPincode', 6)"
+                        (keydown)="preventExceedLength($event, 6)" />
+                    </p-iconfield>
+                    @if (isInvalid('newPincode')) {
+                      <span class="nc-error-msg">
+                        <i class="pi pi-exclamation-triangle"></i>
+                        @if (hasError('newPincode','required')) { Required }
+                        @else { Enter valid 6-digit pincode }
+                      </span>
+                    }
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          }
+
+        </div>
+
+      }
+
+      <p-divider styleClass="nc-divider" />
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">{{ (isMobileChange || isAddressChange) ? 'E' : 'D' }}</span>
+          <div>
+            <p class="nc-section__title">Justification</p>
+            <p class="nc-section__desc">Provide a valid reason (10–200 characters)</p>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="isInvalid('reason')">
+          <div class="nc-label-row">
+            <label class="nc-label" for="reason">
+              <i class="pi pi-comment"></i> Reason for Change
+              <span class="nc-req">*</span>
+            </label>
+            <span class="nc-char-count"
+              [class.nc-char-count--warn]="reasonLen > 180"
+              [class.nc-char-count--ok]="reasonLen >= 10">
+              {{ reasonLen }} / 200
+            </span>
+          </div>
+
+          <textarea pTextarea
+            id="reason"
+            formControlName="reason"
+            rows="4"
+            placeholder="Describe the reason for this change request…"
+            class="nc-textarea"
+            [autoResize]="true"
+            maxlength="200"
+            (keydown)="preventExceedLength($event, 200)">
+          </textarea>
+
+          @if (isInvalid('reason')) {
+            <span class="nc-error-msg">
+              <i class="pi pi-exclamation-triangle"></i>
+              @if (hasError('reason','required')) { Reason is required }
+              @else if (hasError('reason','minlength')) { Minimum 10 characters }
+              @else { Maximum 200 characters }
+            </span>
+          }
+        </div>
+
+      </div>
+
+      <div class="nc-action-bar">
+
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>All fields marked <strong>*</strong> are required</span>
+        </div>
+
+        <div class="nc-action-bar__right">
+          <p-button
+            label="Clear"
+            icon="pi pi-refresh"
+            severity="secondary"
+            [outlined]="true"
+            styleClass="nc-btn nc-btn--clear"
+            (onClick)="clearFormFields()"
+            pTooltip="Reset entire form"
+            tooltipPosition="top" />
+
+          <p-button
+            label="Save Changes"
+            icon="pi pi-check-circle"
+            severity="success"
+            styleClass="nc-btn nc-btn--save"
+            [loading]="isSaving"
+            (onClick)="saveRecord()"
+            pTooltip="Submit change request"
+            tooltipPosition="top" />
+        </div>
+
+      </div>
+
+    </form>
+  </div>
+</div>
+
+} -->

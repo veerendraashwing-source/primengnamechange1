@@ -1,0 +1,270 @@
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isSaving()">
+    @if (isSaving()) {
+      <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-sync"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Chit Adjustment</div>
+          <div class="nc-card__title">Group Code Change</div>
+        </div>
+      </div>
+    </div>
+
+    <form [formGroup]="changForm" class="nc-form">
+
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Existing Ticket</div>
+            <div class="nc-section__desc">Choose branch, group code and ticket to load payment adjustment details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branchlist"
+              optionLabel="branch_name"
+              optionValue="branch_name"
+              formControlName="cao"
+              placeholder="Select branch"
+              [filter]="true"
+              filterBy="branch_name"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['cao'].touched && f['cao'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Branch is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select
+              [options]="branch_code"
+              optionLabel="group_Code"
+              optionValue="group_Code"
+              formControlName="group"
+              placeholder="Select group code"
+              [filter]="true"
+              filterBy="group_Code"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['group'].touched && f['group'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['ticket'].touched && f['ticket'].invalid">
+            <label class="nc-label">Ticket No<span class="nc-req">*</span></label>
+            <p-select
+              [options]="tickets"
+              optionLabel="ticketno"
+              optionValue="ticketno"
+              formControlName="ticket"
+              placeholder="Select ticket no"
+              [filter]="true"
+              filterBy="ticketno"
+              styleClass="nc-select"
+              appendTo="body">
+            </p-select>
+            @if (f['ticket'].touched && f['ticket'].invalid) {
+              <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Ticket No is required</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION B: Compare Existing vs New -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Group Code Change</div>
+            <div class="nc-section__desc">Review existing details and select the new group / ticket</div>
+          </div>
+        </div>
+
+        <div class="nc-compare">
+
+          <!-- OLD COLUMN -->
+          <div class="nc-compare__col nc-compare__col--old">
+            <div class="nc-compare__col-header">
+              <i class="pi pi-history"></i>
+              Existing Details
+              <p-tag styleClass="nc-tag-ro" value="Read-only"></p-tag>
+            </div>
+            <div class="nc-compare__fields">
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Subscriber Name</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="subscriberName" readonly>
+              </div>
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Adjustment Amount</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="adjustmentAmount" readonly>
+              </div>
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Payment Adjustment Type</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="paymentAdjustmentType" readonly>
+              </div>
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Other Adjustment Type ID</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="otherAdjustmentTypeId" readonly>
+              </div>
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Cheque Number</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="chequeNumber" readonly>
+              </div>
+            </div>
+          </div>
+
+          <!-- ARROW -->
+          <div class="nc-compare__arrow">
+            <div class="nc-arrow-beam">
+              <span class="nc-arrow-beam__dot"></span>
+              <span class="nc-arrow-beam__track"></span>
+              <i class="pi pi-angle-right nc-arrow-beam__head"></i>
+            </div>
+            <span class="nc-arrow-beam__label">Change To</span>
+          </div>
+
+          <!-- NEW COLUMN -->
+          <div class="nc-compare__col nc-compare__col--new">
+            <div class="nc-compare__col-header">
+              <i class="pi pi-sparkles"></i>
+              New Details
+              <p-tag styleClass="nc-tag-edit" value="Editable"></p-tag>
+            </div>
+            <div class="nc-compare__fields">
+              <div class="nc-field" [class.nc-field--error]="f['newGroup'].touched && f['newGroup'].invalid">
+                <label class="nc-label nc-label--sm">New Group<span class="nc-req">*</span></label>
+                <p-select
+                  [options]="branch_code"
+                  optionLabel="group_Code"
+                  optionValue="group_Code"
+                  formControlName="newGroup"
+                  placeholder="Select new group"
+                  [filter]="true"
+                  filterBy="group_Code"
+                  styleClass="nc-select"
+                  appendTo="body">
+                </p-select>
+                @if (f['newGroup'].touched && f['newGroup'].invalid) {
+                  <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>New Group is required</div>
+                }
+              </div>
+
+              <div class="nc-field" [class.nc-field--error]="f['newTicket'].touched && f['newTicket'].invalid">
+                <label class="nc-label nc-label--sm">New Ticket No<span class="nc-req">*</span></label>
+                <p-select
+                  [options]="newGroupTickets"
+                  optionLabel="ticketno"
+                  optionValue="ticketno"
+                  formControlName="newTicket"
+                  placeholder="Select new ticket"
+                  [filter]="true"
+                  filterBy="ticketno"
+                  styleClass="nc-select"
+                  appendTo="body">
+                </p-select>
+                @if (f['newTicket'].touched && f['newTicket'].invalid) {
+                  <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>New Ticket No is required</div>
+                }
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm">Subscriber Name</label>
+                <input pInputText class="nc-input nc-input--ro" formControlName="newName" readonly>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION C: Reason -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">Reason</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label">Reason<span class="nc-req">*</span></label>
+            <span class="nc-char-count"
+                  [class.nc-char-count--ok]="f['reason'].value?.length >= 10"
+                  [class.nc-char-count--warn]="f['reason'].value?.length > 180">
+              {{ f['reason'].value?.length || 0 }} / 200
+            </span>
+          </div>
+          <textarea
+            pTextarea
+            class="nc-textarea"
+            formControlName="reason"
+            rows="3"
+            placeholder="Enter reason (min 10 characters)..."
+            (keydown)="preventExceedLength($event, 200)">
+          </textarea>
+          @if (f['reason'].touched && f['reason'].invalid) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i>
+              @if (f['reason'].hasError('required')) { Reason is required }
+              @if (f['reason'].hasError('minlength')) { Minimum 10 characters required }
+              @if (f['reason'].hasError('maxlength')) { Maximum 200 characters allowed }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="isSaving()"
+            (click)="clear()">
+          </button>
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="Save Changes"
+            icon="pi pi-check"
+            [loading]="isSaving()"
+            (click)="confirmSave()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

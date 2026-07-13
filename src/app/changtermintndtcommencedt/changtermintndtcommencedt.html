@@ -1,0 +1,553 @@
+<!-- @if (showForm) {
+<div class="nc-card">
+
+  <div class="nc-card__header">
+    <div class="nc-card__icon-wrap nc-card__icon-wrap--indigo">
+      <i class="pi pi-calendar"></i>
+    </div>
+    <div class="nc-card__title-group" style="flex-direction:column; gap:2px;">
+      <div class="nc-card__subtitle nc-card__subtitle--indigo">Date Modification</div>
+      <div class="nc-card__title">ChitGroup Termination &amp; Commencement Date Change</div>
+    </div>
+  </div>
+
+  <div class="nc-form">
+    <form [formGroup]="changForm">
+
+      <div class="nc-grid-3">
+
+        <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+          <label class="nc-label">
+            CAO <span class="nc-req">*</span>
+          </label>
+          <ng-select
+            [items]="branchlist"
+            bindLabel="branch_name"
+            bindValue="branch_name"
+            formControlName="cao"
+            placeholder="Select branch…"
+            (close)="f['cao'].markAsTouched()">
+          </ng-select>
+          @if (f['cao'].touched && f['cao'].invalid) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> CAO is required
+            </div>
+          }
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+          <label class="nc-label">
+            Group Code <span class="nc-req">*</span>
+          </label>
+          <ng-select
+            [items]="groupList"
+            bindLabel="group_Code"
+            bindValue="group_Code"
+            formControlName="group"
+            placeholder="Select group…"
+            (close)="f['group'].markAsTouched()">
+          </ng-select>
+          @if (f['group'].touched && f['group'].invalid) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Group Code is required
+            </div>
+          }
+        </div>
+
+        <div class="nc-field">
+          <label class="nc-label">No. of Auctions</label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-list-check" />
+            <input
+              pInputText
+              class="nc-input nc-input--ro"
+              [value]="changForm.getRawValue().noActions"
+              readonly />
+          </p-iconfield>
+        </div>
+
+      </div>
+
+      <div class="nc-section-label">Commencement Date</div>
+
+      <div class="nc-grid-3" style="align-items: start;">
+
+        <div class="nc-field">
+          <label class="nc-label">Current Commencement Date</label>
+          <div class="nc-input-btn-row">
+            <p-iconfield style="flex:1;">
+              <p-inputicon class="pi pi-calendar" />
+              <input
+                pInputText
+                class="nc-input nc-input--ro"
+                [value]="changForm.getRawValue().commencementDt | date:'dd-MM-yyyy'"
+                readonly />
+            </p-iconfield>
+            <button
+              type="button"
+              class="nc-edit-btn"
+              [class.nc-edit-btn--active]="editMode.commencement"
+              [disabled]="!f['group'].value"
+              (click)="toggleEdit('commencement')">
+              <i class="pi" [class.pi-pencil]="!editMode.commencement" [class.pi-times]="editMode.commencement"></i>
+              {{ editMode.commencement ? 'Cancel' : 'Edit' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="nc-edit-expanded" [class.visible]="editMode.commencement">
+          <label class="nc-label nc-label-new">New Commencement Date</label>
+          <p-datepicker
+            formControlName="newCommencementDt"
+            dateFormat="dd-mm-yy"
+            [showIcon]="true"
+            styleClass="nc-datepicker"
+            placeholder="Select new date"
+            (onSelect)="onCommencementChange()">
+          </p-datepicker>
+        </div>
+
+      </div>
+
+      <div class="nc-section-label">Termination Date</div>
+
+      <div class="nc-grid-3" style="align-items: start;">
+
+        <div class="nc-field">
+          <label class="nc-label">Current Termination Date</label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-calendar-times" />
+            <input
+              pInputText
+              class="nc-input nc-input--ro"
+              [value]="changForm.getRawValue().terminationDt | date:'dd-MM-yyyy'"
+              readonly />
+          </p-iconfield>
+        </div>
+
+        <div class="nc-edit-expanded" [class.visible]="editMode.commencement">
+          <label class="nc-label">
+            New Termination Date
+            <span class="nc-auto-badge" style="margin-left:6px;">
+              <i class="pi pi-check-circle" style="font-size:9px;"></i> Auto
+            </span>
+          </label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-calendar-times" />
+            <input
+              pInputText
+              class="nc-input nc-input--auto"
+              [value]="changForm.getRawValue().newTerminationDt | date:'dd-MM-yyyy'"
+              placeholder="Auto-computed"
+              readonly />
+          </p-iconfield>
+        </div>
+
+      </div>
+
+      <div class="nc-section-label">PSO Number</div>
+
+      <div class="nc-grid-3" style="align-items: start;">
+
+        <div class="nc-field">
+          <label class="nc-label">Current PSO Number</label>
+          <div class="nc-input-btn-row">
+            <p-iconfield style="flex:1;">
+              <p-inputicon class="pi pi-hashtag" />
+              <input
+                pInputText
+                class="nc-input nc-input--ro"
+                [value]="changForm.getRawValue().psoNo"
+                readonly />
+            </p-iconfield>
+            <button
+              type="button"
+              class="nc-edit-btn"
+              [class.nc-edit-btn--active]="editMode.pso"
+              [disabled]="!f['group'].value"
+              (click)="toggleEdit('pso')">
+              <i class="pi" [class.pi-pencil]="!editMode.pso" [class.pi-times]="editMode.pso"></i>
+              {{ editMode.pso ? 'Cancel' : 'Edit' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="nc-edit-expanded" [class.visible]="editMode.pso">
+          <label class="nc-label nc-label-new">New PSO Number</label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-hashtag" />
+            <input
+              pInputText
+              class="nc-input nc-input--editable"
+              formControlName="newPsoNo"
+              maxlength="20"
+              placeholder="Enter new PSO number" />
+          </p-iconfield>
+          @if (f['newPsoNo'].touched && f['newPsoNo'].errors?.['maxlength']) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Max 20 characters allowed
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <div class="nc-section-label">Commencement Certificate</div>
+
+      <div class="nc-grid-3" style="align-items: start;">
+
+        <div class="nc-field">
+          <label class="nc-label">Current Certificate No.</label>
+          <div class="nc-input-btn-row">
+            <p-iconfield style="flex:1;">
+              <p-inputicon class="pi pi-file-check" />
+              <input
+                pInputText
+                class="nc-input nc-input--ro"
+                [value]="changForm.getRawValue().certificateNo"
+                readonly />
+            </p-iconfield>
+            <button
+              type="button"
+              class="nc-edit-btn"
+              [class.nc-edit-btn--active]="editMode.certificate"
+              [disabled]="!f['group'].value"
+              (click)="toggleEdit('certificate')">
+              <i class="pi" [class.pi-pencil]="!editMode.certificate" [class.pi-times]="editMode.certificate"></i>
+              {{ editMode.certificate ? 'Cancel' : 'Edit' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="nc-edit-expanded" [class.visible]="editMode.certificate">
+          <label class="nc-label nc-label-new">New Certificate No.</label>
+          <p-iconfield>
+            <p-inputicon class="pi pi-file-check" />
+            <input
+              pInputText
+              class="nc-input nc-input--editable"
+              formControlName="newCertificateNo"
+              maxlength="20"
+              placeholder="Enter new certificate number" />
+          </p-iconfield>
+          @if (f['newCertificateNo'].touched && f['newCertificateNo'].errors?.['maxlength']) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Max 20 characters allowed
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+        <div class="nc-label-row">
+          <label class="nc-label">
+            Reason for Change <span class="nc-req">*</span>
+          </label>
+          <span class="nc-field-note">min 10 · max 200 chars</span>
+        </div>
+        <textarea
+          class="nc-textarea"
+          formControlName="reason"
+          rows="3"
+          placeholder="Enter reason for this change…">
+        </textarea>
+        @if (f['reason'].touched && f['reason'].errors) {
+          @if (f['reason'].errors['required']) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Reason is required
+            </div>
+          }
+          @if (f['reason'].errors['minlength']) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Minimum 10 characters required
+            </div>
+          }
+          @if (f['reason'].errors['maxlength']) {
+            <div class="nc-error-msg">
+              <i class="pi pi-exclamation-circle"></i> Maximum 200 characters allowed
+            </div>
+          }
+        }
+      </div>
+
+      <hr class="nc-divider" />
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          Fields marked <strong>*</strong> are required
+        </div>
+        <div class="nc-action-bar__right">
+          <p-button
+            label="Clear"
+            icon="pi pi-times"
+            class="nc-btn p-button nc-btn--clear"
+            (onClick)="clear()">
+          </p-button>
+          <p-button
+            label="Save Changes"
+            icon="pi pi-check-circle"
+            class="nc-btn p-button nc-btn--save"
+            [disabled]="changForm.invalid"
+            (onClick)="confirmSave()">
+          </p-button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+} -->
+
+
+@if (showForm) {
+<div class="nc-page">
+  <div class="nc-grid-texture"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="saving()">
+    @if (saving()) {
+    <p-progressBar mode="indeterminate" styleClass="nc-saving-bar"></p-progressBar>
+    }
+
+    <div class="nc-card__header">
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-calendar"></i>
+        </div>
+        <div>
+          <div class="nc-card__subtitle">Change Request</div>
+          <div class="nc-card__title">Termination & Commencement Date Change</div>
+        </div>
+      </div>
+      <div class="nc-card__header-right">
+        <p-tag styleClass="nc-tag-progress" value="In Progress" icon="pi pi-clock"></p-tag>
+      </div>
+    </div>
+
+    <form [formGroup]="changForm" class="nc-form">
+
+      <!-- SECTION A: Ticket Selection -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">A</div>
+          <div>
+            <div class="nc-section__title">Select Group</div>
+            <div class="nc-section__desc">Choose branch and group to load chit group details</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field" [class.nc-field--error]="f['cao'].touched && f['cao'].invalid">
+            <label class="nc-label">CAO<span class="nc-req">*</span></label>
+            <p-select [options]="branchlist" optionLabel="branch_name" optionValue="branch_name" formControlName="cao"
+              placeholder="Select branch" [filter]="true" filterBy="branch_name" styleClass="nc-select" appendTo="body">
+            </p-select>
+            @if (f['cao'].touched && f['cao'].invalid) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>CAO is required</div>
+            }
+          </div>
+
+          <div class="nc-field" [class.nc-field--error]="f['group'].touched && f['group'].invalid">
+            <label class="nc-label">Group Code<span class="nc-req">*</span></label>
+            <p-select [options]="groupList" optionLabel="group_Code" optionValue="group_Code" formControlName="group"
+              placeholder="Select group" [filter]="true" filterBy="group_Code" styleClass="nc-select" appendTo="body">
+            </p-select>
+            @if (f['group'].touched && f['group'].invalid) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Group Code is required</div>
+            }
+          </div>
+
+          <div class="nc-field">
+            <label class="nc-label">No. of Auctions</label>
+            <input pInputText class="nc-input nc-input--ro" [value]="changForm.getRawValue().noActions" readonly>
+          </div>
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION B: Commencement / Termination Dates -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">B</div>
+          <div>
+            <div class="nc-section__title">Commencement & Termination Dates</div>
+            <div class="nc-section__desc">Click Edit to set a new commencement date — termination date is auto-computed
+            </div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field">
+            <label class="nc-label">Commencement Date</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input pInputText class="nc-input nc-input--ro"
+                [value]="changForm.getRawValue().commencementDt | date:'dd-MM-yyyy'" readonly>
+              <button pButton type="button" class="nc-btn nc-btn--clear"
+                [label]="editMode.commencement ? 'Cancel' : 'Edit'"
+                [icon]="editMode.commencement ? 'pi pi-times' : 'pi pi-pencil'" [disabled]="!f['group'].value"
+                (click)="toggleEdit('commencement')">
+              </button>
+            </div>
+          </div>
+
+          @if (editMode.commencement) {
+          <div class="nc-field">
+            <label class="nc-label">New Commencement Date<span class="nc-req">*</span></label>
+            <p-datepicker formControlName="newCommencementDt" dateFormat="dd-mm-yy" [showIcon]="true"
+              styleClass="nc-datepicker" placeholder="Select new date" appendTo="body"
+              (onSelect)="onCommencementChange()">
+            </p-datepicker>
+          </div>
+          }
+
+          <div class="nc-field">
+            <label class="nc-label">Termination Date</label>
+            <input pInputText class="nc-input nc-input--ro"
+              [value]="changForm.getRawValue().terminationDt | date:'dd-MM-yyyy'" readonly>
+          </div>
+
+          @if (editMode.commencement) {
+          <div class="nc-field">
+            <label class="nc-label">
+              New Termination Date
+              <span class="nc-auto-badge"><i class="pi pi-bolt"></i>Auto</span>
+            </label>
+            <input pInputText class="nc-input nc-input--auto"
+              [value]="changForm.getRawValue().newTerminationDt | date:'dd-MM-yyyy'"
+              placeholder="Auto-filled after date selected" readonly>
+          </div>
+          }
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION C: PSO Number -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">C</div>
+          <div>
+            <div class="nc-section__title">PSO Number</div>
+            <div class="nc-section__desc">Click Edit to update the PSO number</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field">
+            <label class="nc-label">PSO Number</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input pInputText class="nc-input nc-input--ro" [value]="changForm.getRawValue().psoNo" readonly>
+              <button pButton type="button" class="nc-btn nc-btn--clear" [label]="editMode.pso ? 'Cancel' : 'Edit'"
+                [icon]="editMode.pso ? 'pi pi-times' : 'pi pi-pencil'" [disabled]="!f['group'].value"
+                (click)="toggleEdit('pso')">
+              </button>
+            </div>
+          </div>
+
+          @if (editMode.pso) {
+          <div class="nc-field" [class.nc-field--error]="f['newPsoNo'].touched && f['newPsoNo'].errors?.['maxlength']">
+            <label class="nc-label">New PSO Number</label>
+            <input pInputText class="nc-input" formControlName="newPsoNo" maxlength="20"
+              placeholder="Enter new PSO number">
+            @if (f['newPsoNo'].touched && f['newPsoNo'].errors?.['maxlength']) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Max 20 characters allowed</div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION D: Certificate Number -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">D</div>
+          <div>
+            <div class="nc-section__title">Commencement Certificate Number</div>
+            <div class="nc-section__desc">Click Edit to update the certificate number</div>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+          <div class="nc-field">
+            <label class="nc-label">Commencement Certificate No.</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <input pInputText class="nc-input nc-input--ro" [value]="changForm.getRawValue().certificateNo" readonly>
+              <button pButton type="button" class="nc-btn nc-btn--clear"
+                [label]="editMode.certificate ? 'Cancel' : 'Edit'"
+                [icon]="editMode.certificate ? 'pi pi-times' : 'pi pi-pencil'" [disabled]="!f['group'].value"
+                (click)="toggleEdit('certificate')">
+              </button>
+            </div>
+          </div>
+
+          @if (editMode.certificate) {
+          <div class="nc-field"
+            [class.nc-field--error]="f['newCertificateNo'].touched && f['newCertificateNo'].errors?.['maxlength']">
+            <label class="nc-label">New Certificate No.</label>
+            <input pInputText class="nc-input" formControlName="newCertificateNo" maxlength="20"
+              placeholder="Enter new certificate number">
+            @if (f['newCertificateNo'].touched && f['newCertificateNo'].errors?.['maxlength']) {
+            <div class="nc-error-msg"><i class="pi pi-exclamation-circle"></i>Max 20 characters allowed</div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <p-divider styleClass="nc-divider"></p-divider>
+
+      <!-- SECTION E: Reason -->
+      <div class="nc-section">
+        <div class="nc-section__head">
+          <div class="nc-section__letter">E</div>
+          <div>
+            <div class="nc-section__title">Reason for Change</div>
+            <div class="nc-section__desc">Minimum 10 characters — this will be recorded in the audit log</div>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label">Reason<span class="nc-req">*</span></label>
+            <span class="nc-char-count" [class.nc-char-count--ok]="(f['reason'].value?.length ?? 0) >= 10"
+              [class.nc-char-count--warn]="(f['reason'].value?.length ?? 0) > 180">
+              {{ f['reason'].value?.length ?? 0 }} / 200
+            </span>
+          </div>
+          <textarea pTextarea class="nc-textarea" formControlName="reason" rows="4"
+            placeholder="Enter reason for this change...">
+          </textarea>
+          @if (f['reason'].touched && f['reason'].errors) {
+          <div class="nc-error-msg">
+            <i class="pi pi-exclamation-circle"></i>
+            @if (f['reason'].errors['required']) { Reason is required }
+            @if (f['reason'].errors['minlength']) { Minimum 10 characters required }
+            @if (f['reason'].errors['maxlength']) { Maximum 200 characters allowed }
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- ACTION BAR -->
+      <div class="nc-action-bar">
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>Fields marked with <strong>*</strong> are required</span>
+        </div>
+        <div class="nc-action-bar__right">
+          <button pButton type="button" class="nc-btn nc-btn--clear" label="Clear" icon="pi pi-refresh"
+            [disabled]="saving()" (click)="clear()">
+          </button>
+          <button pButton type="button" class="nc-btn nc-btn--save" label="Save Changes" icon="pi pi-check"
+            [loading]="saving()" (click)="confirmSave()">
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

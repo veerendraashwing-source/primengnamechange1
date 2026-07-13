@@ -1,0 +1,750 @@
+<p-toast position="top-right" />
+
+<div class="nc-page">
+
+  <div class="nc-grid-texture" aria-hidden="true"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isSaving">
+
+    <div class="nc-card__header">
+
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-id-card"></i>
+        </div>
+        <div>
+          <p class="nc-card__subtitle">Agent Administration</p>
+          <h2 class="nc-card__title">Agent Branch ID Change</h2>
+        </div>
+      </div>
+
+      <div class="nc-card__header-right">
+        <p-tag
+          value="In Progress"
+          icon="pi pi-clock"
+          styleClass="nc-tag-progress" />
+
+        <div class="nc-steps-indicator">
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Agent Lookup"      tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Branch Selection"  tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--active" pTooltip="Review & Submit"  tooltipPosition="bottom"></span>
+        </div>
+      </div>
+
+    </div>
+
+    @if (isSaving) {
+      <p-progressbar mode="indeterminate" styleClass="nc-saving-bar" />
+    }
+
+    <form [formGroup]="form" class="nc-form" autocomplete="off">
+
+      <!-- ── SECTION A : Agent Lookup ── -->
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">A</span>
+          <div>
+            <p class="nc-section__title">Agent Lookup</p>
+            <p class="nc-section__desc">Select the referral code to load agent details</p>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+
+          <!-- Referral Code -->
+          <div class="nc-field" [class.nc-field--error]="f['referralCode'].touched && f['referralCode'].invalid">
+            <label class="nc-label" for="referralCode">
+              <i class="pi pi-barcode"></i> Agent Code
+              <span class="nc-req">*</span>
+            </label>
+            <p-select
+              inputId="referralCode"
+              [options]="tickets"
+              optionLabel="referralCode"
+              optionValue="referralCode"
+              formControlName="referralCode"
+              placeholder="Select referral code…"
+              [showClear]="true"
+              styleClass="nc-select"
+              appendTo="body"
+              [filter]="true"
+              filterPlaceholder="Search code"
+              (onChange)="getAgentDetails()">
+              <ng-template #filter let-options="options" let-filterOptions="filterOptions">
+                <input
+                  type="text"
+                  pInputText
+                  maxlength="25"
+                  placeholder="Search code…"
+                  (input)="filterOptions($any($event.target).value)" />
+              </ng-template>
+            </p-select>
+            @if (f['referralCode'].touched && f['referralCode'].invalid) {
+              <span class="nc-error-msg">
+                <i class="pi pi-exclamation-triangle"></i> Referral Code is required
+              </span>
+            }
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ── SECTION B : Agent Details (shown after lookup) ── -->
+      @if (f['referralCode'].value) {
+
+        <p-divider styleClass="nc-divider" />
+
+        <div class="nc-section">
+
+          <div class="nc-section__head">
+            <span class="nc-section__letter">B</span>
+            <div>
+              <p class="nc-section__title">Agent Details</p>
+              <p class="nc-section__desc">Current agent information — read only</p>
+            </div>
+          </div>
+
+          <div class="nc-readonly-panel">
+            <div class="nc-readonly-panel__header">
+              <i class="pi pi-lock"></i>
+              <span>Current Record</span>
+              <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+            </div>
+
+            <div class="nc-grid-3 nc-readonly-panel__fields">
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-user"></i> Agent Name</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-user" />
+                  <input pInputText formControlName="agentName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-key"></i> Agent Unique Code</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-key" />
+                  <input pInputText formControlName="agentUniqueCode" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-phone"></i> Mobile No.</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-phone" />
+                  <input pInputText formControlName="mobileNo" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> Current Branch</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-building" />
+                  <input pInputText formControlName="branchName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      }
+
+      <p-divider styleClass="nc-divider" />
+
+      <!-- ── SECTION C : Branch Change ── -->
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">{{ f['referralCode'].value ? 'C' : 'B' }}</span>
+          <div>
+            <p class="nc-section__title">Branch Assignment</p>
+            <p class="nc-section__desc">Select the new branch to assign to this agent</p>
+          </div>
+        </div>
+
+        @if (f['referralCode'].value) {
+
+          <div class="nc-compare">
+
+            <!-- OLD column -->
+            <div class="nc-compare__col nc-compare__col--old">
+              <div class="nc-compare__col-header">
+                <i class="pi pi-lock"></i>
+                <span>Current Branch</span>
+                <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+              </div>
+              <div class="nc-compare__fields">
+                <div class="nc-field">
+                  <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> Branch Name</label>
+                  <p-iconfield>
+                    <p-inputicon styleClass="pi pi-building" />
+                    <input pInputText formControlName="branchName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                  </p-iconfield>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arrow divider -->
+            <div class="nc-compare__arrow" aria-hidden="true">
+              <div class="nc-arrow-beam">
+                <span class="nc-arrow-beam__dot"></span>
+                <span class="nc-arrow-beam__track"></span>
+                <i class="pi pi-arrow-right nc-arrow-beam__head"></i>
+              </div>
+              <span class="nc-arrow-beam__label">UPDATING</span>
+            </div>
+
+            <!-- NEW column -->
+            <div class="nc-compare__col nc-compare__col--new">
+              <div class="nc-compare__col-header">
+                <i class="pi pi-file-edit"></i>
+                <span>New Branch</span>
+                <p-tag value="Editable" severity="info" styleClass="nc-tag-edit" />
+              </div>
+              <div class="nc-compare__fields">
+                <div class="nc-field" [class.nc-field--error]="f['branchconfigurationid'].touched && f['branchconfigurationid'].invalid">
+                  <label class="nc-label nc-label--sm">
+                    New Branch Name <span class="nc-req">*</span>
+                  </label>
+                  <p-select
+                    [options]="branches"
+                    optionLabel="branchName"
+                    optionValue="branchconfigurationid"
+                    formControlName="branchconfigurationid"
+                    placeholder="Select new branch…"
+                    [showClear]="true"
+                    styleClass="nc-select"
+                    appendTo="body"
+                    [filter]="true"
+                    filterPlaceholder="Search branch">
+                    <ng-template #filter let-options="options" let-filterOptions="filterOptions">
+                      <input
+                        type="text"
+                        pInputText
+                        maxlength="25"
+                        placeholder="Search branch…"
+                        (input)="filterOptions($any($event.target).value)" />
+                    </ng-template>
+                  </p-select>
+                  <!-- Variation preview table -->
+                  @if (variations.length > 0) {
+                    <div class="nc-variation-table" style="margin-top:0.75rem;">
+                      <p-table [value]="variations" [responsiveLayout]="'stack'" styleClass="nc-table nc-variation">
+                        <ng-template pTemplate="header">
+                          <tr>
+                            <th>Field</th>
+                            <th>Current</th>
+                            <th>New</th>
+                          </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="body" let-row>
+                          <tr [ngClass]="{ 'nc-diff-row': row.changed }">
+                            <td>{{ row.field }}</td>
+                            <td>{{ row.oldValue || '—' }}</td>
+                            <td>
+                              <span [ngClass]="{ 'nc-val-changed': row.changed }">{{ row.newValue || '—' }}</span>
+                            </td>
+                          </tr>
+                        </ng-template>
+                      </p-table>
+                    </div>
+                  }
+                  @if (f['branchconfigurationid'].touched && f['branchconfigurationid'].invalid) {
+                    <span class="nc-error-msg">
+                      <i class="pi pi-exclamation-triangle"></i>
+                      @if (f['branchconfigurationid'].errors?.['agentCodeMissing']) {
+                        {{ f['branchconfigurationid'].errors?.['agentCodeMissing'] }}
+                      } @else {
+                        Please select a new branch
+                      }
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        } @else {
+
+          <div class="nc-empty-state">
+            <i class="pi pi-arrow-up-left nc-empty-state__icon"></i>
+            <p class="nc-empty-state__text">Select an agent code above to enable branch selection</p>
+          </div>
+
+        }
+
+      </div>
+
+      <p-divider styleClass="nc-divider" />
+
+      <!-- ── SECTION D : Reason ── -->
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">{{ f['referralCode'].value ? 'D' : 'C' }}</span>
+          <div>
+            <p class="nc-section__title">Justification</p>
+            <p class="nc-section__desc">Provide a valid reason for this branch change (max 200 characters)</p>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label" for="reason">
+              <i class="pi pi-comment"></i> Reason for Change
+              <span class="nc-req">*</span>
+            </label>
+            <span class="nc-char-count"
+              [class.nc-char-count--warn]="reasonLen > 180"
+              [class.nc-char-count--ok]="reasonLen >= 10">
+              {{ reasonLen }} / 200
+            </span>
+          </div>
+
+          <textarea pTextarea
+            id="reason"
+            formControlName="reason"
+            rows="4"
+            placeholder="Describe the reason for this branch change request…"
+            class="nc-textarea"
+            [autoResize]="true"
+            maxlength="200">
+          </textarea>
+
+          @if (f['reason'].touched && f['reason'].invalid) {
+            <span class="nc-error-msg">
+              <i class="pi pi-exclamation-triangle"></i>
+              @if (f['reason'].errors?.['required']) { Reason is required }
+            </span>
+          }
+        </div>
+
+      </div>
+
+      <!-- ── ACTION BAR ── -->
+      <div class="nc-action-bar">
+
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>All fields marked <strong>*</strong> are required</span>
+        </div>
+
+        <div class="nc-action-bar__right">
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--clear"
+            label="Clear"
+            icon="pi pi-refresh"
+            [disabled]="isSaving"
+            (click)="clear()"
+            pTooltip="Reset entire form"
+            tooltipPosition="top">
+          </button>
+
+          <button
+            pButton
+            type="button"
+            class="nc-btn nc-btn--save"
+            label="Save Changes"
+            icon="pi pi-check-circle"
+            [loading]="isSaving"
+            (click)="save()"
+            pTooltip="Submit branch change"
+            tooltipPosition="top">
+          </button>
+        </div>
+
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<!-- ── Custom Confirm Modal (matches nc- design system) ── -->
+@if (showConfirmModal) {
+  <div class="nc-confirm-backdrop" (click)="cancelConfirm()">
+    <div class="nc-confirm-modal" (click)="$event.stopPropagation()">
+
+      <div class="nc-confirm-modal__header">
+        <div class="nc-confirm-modal__header-left">
+          <span class="nc-confirm-modal__icon"><i class="pi pi-shield"></i></span>
+          <h5>Confirm Branch Change</h5>
+        </div>
+        <button type="button" class="nc-confirm-modal__close" (click)="cancelConfirm()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <div class="nc-confirm-modal__body">
+        <p class="nc-confirm-modal__lead">
+          You're about to update the assigned branch for this agent. Please review before confirming.
+        </p>
+
+        <div class="nc-confirm-modal__transition">
+          <div class="nc-confirm-modal__branch">
+            <p class="nc-confirm-modal__branch-label">From</p>
+            <p class="nc-confirm-modal__branch-value">{{ pendingOldBranch }}</p>
+          </div>
+          <span class="nc-confirm-modal__arrow"><i class="pi pi-arrow-right"></i></span>
+          <div class="nc-confirm-modal__branch">
+            <p class="nc-confirm-modal__branch-label">To</p>
+            <p class="nc-confirm-modal__branch-value nc-confirm-modal__branch-value--new">{{ pendingNewBranch }}</p>
+          </div>
+        </div>
+
+        <div class="nc-confirm-modal__reason">
+          <i class="pi pi-info-circle"></i>
+          <span>This action will be recorded in the audit log with the reason: “{{ pendingReason }}”</span>
+        </div>
+      </div>
+
+      <div class="nc-confirm-modal__footer">
+        <button
+          pButton
+          type="button"
+          class="nc-confirm-modal__btn-cancel"
+          (click)="cancelConfirm()">
+          Cancel
+        </button>
+        <button
+          pButton
+          type="button"
+          class="nc-confirm-modal__btn-confirm"
+          [disabled]="isSaving"
+          (click)="confirmSave()">
+          <i class="pi pi-check"></i> Yes, Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- 
+<p-toast position="top-right" />
+<p-confirmDialog styleClass="nc-confirm" />
+
+<div class="nc-page">
+
+  <div class="nc-grid-texture" aria-hidden="true"></div>
+
+  <div class="nc-card" [class.nc-card--saving]="isSaving">
+
+    <div class="nc-card__header">
+
+      <div class="nc-card__title-group">
+        <div class="nc-card__icon-wrap">
+          <i class="pi pi-id-card"></i>
+        </div>
+        <div>
+          <p class="nc-card__subtitle">Agent Administration</p>
+          <h2 class="nc-card__title">Agent Branch ID Change</h2>
+        </div>
+      </div>
+
+      <div class="nc-card__header-right">
+        <p-tag
+          value="In Progress"
+          icon="pi pi-clock"
+          styleClass="nc-tag-progress" />
+
+        <div class="nc-steps-indicator">
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Agent Lookup"      tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--done"  pTooltip="Branch Selection"  tooltipPosition="bottom"></span>
+          <span class="nc-step-line"></span>
+          <span class="nc-step-dot nc-step-dot--active" pTooltip="Review & Submit"  tooltipPosition="bottom"></span>
+        </div>
+      </div>
+
+    </div>
+
+    @if (isSaving) {
+      <p-progressbar mode="indeterminate" styleClass="nc-saving-bar" />
+    }
+
+    <form [formGroup]="form" class="nc-form" autocomplete="off">
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">A</span>
+          <div>
+            <p class="nc-section__title">Agent Lookup</p>
+            <p class="nc-section__desc">Select the referral code to load agent details</p>
+          </div>
+        </div>
+
+        <div class="nc-grid-3">
+
+          <div class="nc-field" [class.nc-field--error]="f['referralCode'].touched && f['referralCode'].invalid">
+            <label class="nc-label" for="referralCode">
+              <i class="pi pi-barcode"></i> Agent Code
+              <span class="nc-req">*</span>
+            </label>
+            <p-select
+              inputId="referralCode"
+              [options]="tickets"
+              optionLabel="referralCode"
+              optionValue="referralCode"
+              formControlName="referralCode"
+              placeholder="Select referral code…"
+              [showClear]="true"
+              styleClass="nc-select"
+              appendTo="body"
+              [filter]="true"
+              filterPlaceholder="Search code"
+              (onChange)="getAgentDetails()" />
+            @if (f['referralCode'].touched && f['referralCode'].invalid) {
+              <span class="nc-error-msg">
+                <i class="pi pi-exclamation-triangle"></i> Referral Code is required
+              </span>
+            }
+          </div>
+
+        </div>
+
+      </div>
+
+      @if (f['referralCode'].value) {
+
+        <p-divider styleClass="nc-divider" />
+
+        <div class="nc-section">
+
+          <div class="nc-section__head">
+            <span class="nc-section__letter">B</span>
+            <div>
+              <p class="nc-section__title">Agent Details</p>
+              <p class="nc-section__desc">Current agent information — read only</p>
+            </div>
+          </div>
+
+          <div class="nc-readonly-panel">
+            <div class="nc-readonly-panel__header">
+              <i class="pi pi-lock"></i>
+              <span>Current Record</span>
+              <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+            </div>
+
+            <div class="nc-grid-3 nc-readonly-panel__fields">
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-user"></i> Agent Name</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-user" />
+                  <input pInputText formControlName="agentName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-key"></i> Agent Unique Code</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-key" />
+                  <input pInputText formControlName="agentUniqueCode" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-phone"></i> Mobile No.</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-phone" />
+                  <input pInputText formControlName="mobileNo" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+              <div class="nc-field">
+                <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> Current Branch</label>
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-building" />
+                  <input pInputText formControlName="branchName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                </p-iconfield>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      }
+
+      <p-divider styleClass="nc-divider" />
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">{{ f['referralCode'].value ? 'C' : 'B' }}</span>
+          <div>
+            <p class="nc-section__title">Branch Assignment</p>
+            <p class="nc-section__desc">Select the new branch to assign to this agent</p>
+          </div>
+        </div>
+
+        @if (f['referralCode'].value) {
+
+          <div class="nc-compare">
+
+            <div class="nc-compare__col nc-compare__col--old">
+              <div class="nc-compare__col-header">
+                <i class="pi pi-lock"></i>
+                <span>Current Branch</span>
+                <p-tag value="Read Only" severity="secondary" styleClass="nc-tag-ro" />
+              </div>
+              <div class="nc-compare__fields">
+                <div class="nc-field">
+                  <label class="nc-label nc-label--sm"><i class="pi pi-building"></i> Branch Name</label>
+                  <p-iconfield>
+                    <p-inputicon styleClass="pi pi-building" />
+                    <input pInputText formControlName="branchName" placeholder="—" readonly class="nc-input nc-input--ro" />
+                  </p-iconfield>
+                </div>
+              </div>
+            </div>
+
+            <div class="nc-compare__arrow" aria-hidden="true">
+              <div class="nc-arrow-beam">
+                <span class="nc-arrow-beam__dot"></span>
+                <span class="nc-arrow-beam__track"></span>
+                <i class="pi pi-arrow-right nc-arrow-beam__head"></i>
+              </div>
+              <span class="nc-arrow-beam__label">UPDATING</span>
+            </div>
+
+            <div class="nc-compare__col nc-compare__col--new">
+              <div class="nc-compare__col-header">
+                <i class="pi pi-file-edit"></i>
+                <span>New Branch</span>
+                <p-tag value="Editable" severity="info" styleClass="nc-tag-edit" />
+              </div>
+              <div class="nc-compare__fields">
+                <div class="nc-field" [class.nc-field--error]="f['branchconfigurationid'].touched && f['branchconfigurationid'].invalid">
+                  <label class="nc-label nc-label--sm">
+                    New Branch Name <span class="nc-req">*</span>
+                  </label>
+                  <p-select
+                    [options]="branches"
+                    optionLabel="branchName"
+                    optionValue="branchconfigurationid"
+                    formControlName="branchconfigurationid"
+                    placeholder="Select new branch…"
+                    [showClear]="true"
+                    styleClass="nc-select"
+                    appendTo="body"
+                    [filter]="true"
+                    filterPlaceholder="Search branch" />
+                  @if (f['branchconfigurationid'].touched && f['branchconfigurationid'].invalid) {
+                    <span class="nc-error-msg">
+                      <i class="pi pi-exclamation-triangle"></i>
+                      @if (f['branchconfigurationid'].errors?.['agentCodeMissing']) {
+                        {{ f['branchconfigurationid'].errors?.['agentCodeMissing'] }}
+                      } @else {
+                        Please select a new branch
+                      }
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        } @else {
+
+          <div class="nc-empty-state">
+            <i class="pi pi-arrow-up-left nc-empty-state__icon"></i>
+            <p class="nc-empty-state__text">Select an agent code above to enable branch selection</p>
+          </div>
+
+        }
+
+      </div>
+
+      <p-divider styleClass="nc-divider" />
+
+      <div class="nc-section">
+
+        <div class="nc-section__head">
+          <span class="nc-section__letter">{{ f['referralCode'].value ? 'D' : 'C' }}</span>
+          <div>
+            <p class="nc-section__title">Justification</p>
+            <p class="nc-section__desc">Provide a valid reason for this branch change (max 200 characters)</p>
+          </div>
+        </div>
+
+        <div class="nc-field" [class.nc-field--error]="f['reason'].touched && f['reason'].invalid">
+          <div class="nc-label-row">
+            <label class="nc-label" for="reason">
+              <i class="pi pi-comment"></i> Reason for Change
+              <span class="nc-req">*</span>
+            </label>
+            <span class="nc-char-count"
+              [class.nc-char-count--warn]="reasonLen > 180"
+              [class.nc-char-count--ok]="reasonLen >= 10">
+              {{ reasonLen }} / 200
+            </span>
+          </div>
+
+          <textarea pTextarea
+            id="reason"
+            formControlName="reason"
+            rows="4"
+            placeholder="Describe the reason for this branch change request…"
+            class="nc-textarea"
+            [autoResize]="true"
+            maxlength="200">
+          </textarea>
+
+          @if (f['reason'].touched && f['reason'].invalid) {
+            <span class="nc-error-msg">
+              <i class="pi pi-exclamation-triangle"></i>
+              @if (f['reason'].errors?.['required']) { Reason is required }
+            </span>
+          }
+        </div>
+
+      </div>
+
+      <div class="nc-action-bar">
+
+        <div class="nc-action-bar__left">
+          <i class="pi pi-info-circle"></i>
+          <span>All fields marked <strong>*</strong> are required</span>
+        </div>
+
+        <div class="nc-action-bar__right">
+          <p-button
+            label="Clear"
+            icon="pi pi-refresh"
+            severity="secondary"
+            [outlined]="true"
+            styleClass="nc-btn nc-btn--clear"
+            (onClick)="clear()"
+            pTooltip="Reset entire form"
+            tooltipPosition="top" />
+
+          <p-button
+            label="Save Changes"
+            icon="pi pi-check-circle"
+            severity="success"
+            styleClass="nc-btn nc-btn--save"
+            [loading]="isSaving"
+            (onClick)="save()"
+            pTooltip="Submit branch change"
+            tooltipPosition="top" />
+        </div>
+
+      </div>
+
+    </form>
+  </div>
+</div> -->
